@@ -1,11 +1,13 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, BookOpen, Moon, Sun } from 'lucide-react';
+import { Home, CheckSquare, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useAuth } from '../contexts/AuthContext';
 import clsx from 'clsx';
 
 export default function Layout() {
     const location = useLocation();
     const { isDark, toggleDarkMode } = useDarkMode();
+    const { logout } = useAuth();
 
     const navItems = [
         { path: '/', icon: Home, label: 'Home' },
@@ -13,10 +15,18 @@ export default function Layout() {
         { path: '/journal', icon: BookOpen, label: 'Journal' },
     ];
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } catch (error) {
+            console.error('Failed to log out:', error);
+        }
+    };
+
     return (
         <div className="min-h-screen font-sans flex justify-center transition-colors duration-200" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
             <div className="w-full max-w-md min-h-screen shadow-xl relative" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                <header className="absolute top-0 right-0 p-4 z-20">
+                <header className="absolute top-0 right-0 p-4 z-20 flex gap-2">
                     <button
                         onClick={toggleDarkMode}
                         className="p-2 rounded-lg transition-colors"
@@ -24,6 +34,14 @@ export default function Layout() {
                         aria-label="Toggle dark mode"
                     >
                         {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ backgroundColor: 'var(--color-bg-hover)', color: 'var(--color-text-secondary)' }}
+                        aria-label="Logout"
+                    >
+                        <LogOut size={20} />
                     </button>
                 </header>
 

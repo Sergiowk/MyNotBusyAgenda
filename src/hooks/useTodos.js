@@ -1,41 +1,69 @@
 import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'my_not_busy_agenda_todos';
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { db } from '../firebase/config';
+import { useAuth } from '../contexts/AuthContext';
 
 export function useTodos() {
-    const [todos, setTodos] = useState(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        return saved ? JSON.parse(saved) : [];
-    });
+    const [todos, setTodos] = useState([]);
+    const { user } = useAuth();
 
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
-    }, [todos]);
+        if (!user) {
+            setTodos([]);
+            return;
+        }
 
-    const addTodo = (text, category = 'general') => {
-        if (!text.trim()) return;
-        setTodos([
-            {
-                id: Date.now().toString(),
+        const todosRef = collection(db, 'users', user.uid, 'todos');
+        const q = query(todosRef, orderBy('createdAt', 'desc'));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const todosData = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            setTodos(todosData);
+        });
+
+        return unsubscribe;
+    }, [user]);
+
+    const addTodo = async (text, category = 'general') => {
+        if (!text.trim() || !user) return;
+
+        try {
+            await addDoc(collection(db, 'users', user.uid, 'todos'), {
                 text,
                 completed: false,
                 category,
-                createdAt: new Date().toISOString(),
-            },
-            ...todos,
-        ]);
+                createdAt: new Date(),
+            });
+        } catch (error) {
+            console.error('Error adding todo:', error);
+        }
     };
 
-    const toggleTodo = (id) => {
-        setTodos(
-            todos.map((todo) =>
-                todo.id === id ? { ...todo, completed: !todo.completed } : todo
-            )
-        );
+    const toggleTodo = async (id) => {
+        if (!user) return;
+
+        try {
+            const todo = todos.find(t => t.id === id);
+            const todoRef = doc(db, 'users', user.uid, 'todos', id);
+            await updateDoc(todoRef, {
+                completed: !todo.completed
+            });
+        } catch (error) {
+            console.error('Error toggling todo:', error);
+        }
     };
 
-    const deleteTodo = (id) => {
-        setTodos(todos.filter((todo) => todo.id !== id));
+    const deleteTodo = async (id) => {
+        if (!user) return;
+
+        try {
+            await deleteDoc(doc(db, 'users', user.uid, 'todos', id));
+        } catch (error) {
+            console.error('Error deleting todo:', error);
+        }
     };
 
     return { todos, addTodo, toggleTodo, deleteTodo };
