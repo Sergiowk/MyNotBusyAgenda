@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Todos from './pages/Todos';
@@ -39,11 +41,14 @@ function ProtectedRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <ProtectedRoutes />
-      </BrowserRouter>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <ProtectedRoutes />
+          <LanguageSelector />
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 

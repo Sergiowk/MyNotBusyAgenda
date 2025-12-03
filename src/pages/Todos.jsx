@@ -3,12 +3,14 @@ import { useTodos } from '../hooks/useTodos';
 import { Plus, Trash2, CheckCircle, Circle, Clock, X } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedDate);
     const [input, setInput] = useState('');
+    const { t } = useLanguage();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -25,12 +27,12 @@ export default function Todos() {
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
-                        {isHistoryView ? 'Past Tasks' : 'Tasks'}
+                        {isHistoryView ? t('tasks.past_title') : t('tasks.title')}
                     </h1>
                     <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                         {isHistoryView
-                            ? `Viewing tasks for ${selectedDate.toLocaleDateString()}`
-                            : 'Organize your day.'}
+                            ? `${t('tasks.past_subtitle')} ${selectedDate.toLocaleDateString()}`
+                            : t('tasks.subtitle')}
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -39,7 +41,7 @@ export default function Todos() {
                             onClick={() => setSelectedDate(null)}
                             className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
                             style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
-                            title="Clear filter"
+                            title={t('common.clear_filter')}
                         >
                             <X size={24} />
                         </button>
@@ -48,7 +50,7 @@ export default function Todos() {
                         onClick={() => setShowHistory(true)}
                         className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                        title="View History"
+                        title={t('common.view_history')}
                     >
                         <Clock size={24} />
                     </button>
@@ -61,7 +63,7 @@ export default function Todos() {
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="Add a new task..."
+                        placeholder={t('tasks.placeholder')}
                         className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
                         style={{
                             backgroundColor: 'var(--color-bg-card)',
@@ -82,7 +84,7 @@ export default function Todos() {
             <div className="space-y-3">
                 {todos.length === 0 ? (
                     <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
-                        <p>{isHistoryView ? 'No tasks found for this date.' : 'No tasks yet. Add one above!'}</p>
+                        <p>{isHistoryView ? t('tasks.empty_past') : t('tasks.empty')}</p>
                     </div>
                 ) : (
                     todos.map((todo) => (
@@ -97,7 +99,7 @@ export default function Todos() {
                             <button
                                 onClick={() => toggleTodo(todo.id)}
                                 className="flex items-center gap-3 flex-1 text-left"
-                                disabled={isHistoryView} // Disable toggling in history view? Maybe allow it? User didn't specify. I'll allow it for now but maybe it should be read-only. Let's keep it interactive.
+                                disabled={isHistoryView}
                             >
                                 {todo.completed ? (
                                     <CheckCircle className="text-green-600" size={24} />
@@ -117,7 +119,7 @@ export default function Todos() {
                                     onClick={() => deleteTodo(todo.id)}
                                     className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
                                     style={{ color: 'var(--color-text-muted)' }}
-                                    aria-label="Delete task"
+                                    aria-label={t('tasks.delete_label')}
                                 >
                                     <Trash2 size={20} />
                                 </button>

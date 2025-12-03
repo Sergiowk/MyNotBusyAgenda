@@ -1,7 +1,10 @@
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+
 
 export default function Login() {
     const { signInWithGoogle } = useAuth();
+    const { t } = useLanguage();
 
     const handleGoogleSignIn = async () => {
         try {
@@ -19,13 +22,13 @@ export default function Login() {
                         MyNotBusyAgenda
                     </h1>
                     <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
-                        Your personal organization companion
+                        {t('auth.subtitle')}
                     </p>
                 </div>
 
                 <div className="p-8 rounded-2xl border" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
                     <h2 className="text-2xl font-semibold mb-6 text-center" style={{ color: 'var(--color-text-primary)' }}>
-                        Welcome
+                        {t('auth.welcome')}
                     </h2>
 
                     <button
@@ -51,11 +54,11 @@ export default function Login() {
                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                             />
                         </svg>
-                        Sign in with Google
+                        {t('auth.sign_in_google')}
                     </button>
 
                     <p className="mt-6 text-sm text-center" style={{ color: 'var(--color-text-tertiary)' }}>
-                        Sign in to sync your data across devices
+                        {t('auth.subtitle')}
                     </p>
                 </div>
             </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useFocus } from '../hooks/useFocus';
 import { useTodos } from '../hooks/useTodos';
 import { useClock } from '../hooks/useClock';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Circle, ArrowRight } from 'lucide-react';
 import Calendar from '../components/Calendar';
@@ -12,6 +13,7 @@ export default function Dashboard() {
     const { focus, setFocusText, toggleFocus } = useFocus();
     const { todos } = useTodos();
     const { greeting, formattedTime } = useClock();
+    const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(!focus.text);
     const [selectedDate, setSelectedDate] = useState(null);
     const [showSummary, setShowSummary] = useState(false);
@@ -33,7 +35,7 @@ export default function Dashboard() {
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>{greeting}</h1>
-                    <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Ready for a clear mind?</p>
+                    <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.subtitle')}</p>
                 </div>
                 <div className="text-right">
                     <div className="text-3xl font-semibold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
@@ -43,7 +45,7 @@ export default function Dashboard() {
             </header>
 
             <div className="p-6 rounded-2xl border" style={{ backgroundColor: 'var(--color-bg-hover)', borderColor: 'var(--color-border)' }}>
-                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>Focus for Today</h2>
+                <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>{t('dashboard.focus_title')}</h2>
 
                 {isEditing ? (
                     <form onSubmit={handleFocusSubmit}>
@@ -51,7 +53,7 @@ export default function Dashboard() {
                             type="text"
                             value={focus.text}
                             onChange={(e) => setFocusText(e.target.value)}
-                            placeholder="What is your main goal?"
+                            placeholder={t('dashboard.focus_placeholder')}
                             className="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 transition-all"
                             style={{
                                 backgroundColor: 'var(--color-bg-input)',
@@ -78,7 +80,7 @@ export default function Dashboard() {
                             className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                             style={{ color: 'var(--color-text-tertiary)' }}
                         >
-                            Edit
+                            {t('common.edit')}
                         </button>
                     </div>
                 )}
@@ -86,18 +88,18 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-2 gap-4">
                 <Link to="/todos" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
-                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Tasks</h3>
-                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{pendingTodos} Pending</p>
+                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.tasks_card.title')}</h3>
+                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{pendingTodos} {t('dashboard.tasks_card.pending')}</p>
                     <div className="mt-4 flex items-center text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
-                        View Tasks <ArrowRight size={16} className="ml-1" />
+                        {t('dashboard.tasks_card.action')} <ArrowRight size={16} className="ml-1" />
                     </div>
                 </Link>
 
                 <Link to="/journal" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
-                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>Journal</h3>
-                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Reflect</p>
+                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.journal_card.title')}</h3>
+                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('dashboard.journal_card.subtitle')}</p>
                     <div className="mt-4 flex items-center text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
-                        Write <ArrowRight size={16} className="ml-1" />
+                        {t('dashboard.journal_card.action')} <ArrowRight size={16} className="ml-1" />
                     </div>
                 </Link>
             </div>

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useJournal } from '../hooks/useJournal';
 import { Send, Trash2, Clock, X } from 'lucide-react';
 import HistoryModal from '../components/HistoryModal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Journal() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const { entries, addEntry, deleteEntry } = useJournal(selectedDate);
     const [input, setInput] = useState('');
+    const { t } = useLanguage();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -24,12 +26,12 @@ export default function Journal() {
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
-                        {isHistoryView ? 'Past Entries' : 'Journal'}
+                        {isHistoryView ? t('journal.past_title') : t('journal.title')}
                     </h1>
                     <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                         {isHistoryView
-                            ? `Viewing entries for ${selectedDate.toLocaleDateString()}`
-                            : 'Reflect on your thoughts.'}
+                            ? `${t('journal.past_subtitle')} ${selectedDate.toLocaleDateString()}`
+                            : t('journal.subtitle')}
                     </p>
                 </div>
                 <div className="flex gap-2">
@@ -38,7 +40,7 @@ export default function Journal() {
                             onClick={() => setSelectedDate(null)}
                             className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
                             style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
-                            title="Clear filter"
+                            title={t('common.clear_filter')}
                         >
                             <X size={24} />
                         </button>
@@ -47,7 +49,7 @@ export default function Journal() {
                         onClick={() => setShowHistory(true)}
                         className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                        title="View History"
+                        title={t('common.view_history')}
                     >
                         <Clock size={24} />
                     </button>
@@ -59,7 +61,7 @@ export default function Journal() {
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder="What's on your mind?"
+                        placeholder={t('journal.placeholder')}
                         className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all min-h-[120px] resize-none"
                         style={{
                             backgroundColor: 'var(--color-bg-card)',
@@ -80,7 +82,7 @@ export default function Journal() {
             <div className="space-y-4">
                 {entries.length === 0 ? (
                     <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
-                        <p>{isHistoryView ? 'No entries found for this date.' : 'No entries yet. Start writing!'}</p>
+                        <p>{isHistoryView ? t('journal.empty_past') : t('journal.empty')}</p>
                     </div>
                 ) : (
                     entries.map((entry) => (

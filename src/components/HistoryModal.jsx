@@ -1,7 +1,9 @@
 import { X } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 import Calendar from './Calendar';
 
 export default function HistoryModal({ isOpen, onClose, onDateSelect, selectedDate }) {
+    const { t } = useLanguage();
     if (!isOpen) return null;
 
     return (
@@ -12,7 +14,7 @@ export default function HistoryModal({ isOpen, onClose, onDateSelect, selectedDa
             >
                 <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
                     <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                        Select Date
+                        {t('calendar.select_date')}
                     </h2>
                     <button
                         onClick={onClose}

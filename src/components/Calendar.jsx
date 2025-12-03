@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Calendar({ onDateSelect, selectedDate }) {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const { language } = useLanguage();
 
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
@@ -17,7 +19,7 @@ export default function Calendar({ onDateSelect, selectedDate }) {
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
     // Get month name
-    const monthName = currentDate.toLocaleString('default', { month: 'long' });
+    const monthName = currentDate.toLocaleString(language, { month: 'long' });
 
     const prevMonth = () => {
         setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
@@ -66,12 +68,17 @@ export default function Calendar({ onDateSelect, selectedDate }) {
         days.push(day);
     }
 
-    const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    // Generate week days based on locale
+    // Jan 2, 2023 was a Monday. We want Mon-Sun.
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(2023, 0, i + 2);
+        return d.toLocaleString(language, { weekday: 'short' });
+    });
 
     return (
         <div className="p-5 rounded-2xl border" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                <h3 className="text-lg font-semibold capitalize" style={{ color: 'var(--color-text-primary)' }}>
                     {monthName} {currentYear}
                 </h3>
                 <div className="flex gap-1">
@@ -97,7 +104,7 @@ export default function Calendar({ onDateSelect, selectedDate }) {
                 {weekDays.map((day) => (
                     <div
                         key={day}
-                        className="text-center text-xs font-medium py-2"
+                        className="text-center text-xs font-medium py-2 capitalize"
                         style={{ color: 'var(--color-text-tertiary)' }}
                     >
                         {day}

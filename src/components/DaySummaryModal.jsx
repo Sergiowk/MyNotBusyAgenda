@@ -1,10 +1,13 @@
 import { X } from 'lucide-react';
 import { useTodos } from '../hooks/useTodos';
+
 import { useJournal } from '../hooks/useJournal';
+import { useLanguage } from '../contexts/LanguageContext';
 
 export default function DaySummaryModal({ isOpen, onClose, date }) {
     const { todos } = useTodos(date);
     const { entries } = useJournal(date);
+    const { t, language } = useLanguage();
 
     if (!isOpen || !date) return null;
 
@@ -16,7 +19,7 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
             >
                 <div className="flex items-center justify-between p-4 border-b shrink-0" style={{ borderColor: 'var(--color-border)' }}>
                     <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                        Summary for {date.toLocaleDateString()}
+                        {t('calendar.summary_title')} {date.toLocaleDateString(language)}
                     </h2>
                     <button
                         onClick={onClose}
@@ -31,10 +34,10 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
                     {/* Tasks Section */}
                     <div>
                         <h3 className="text-sm font-medium mb-3 uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>
-                            Tasks ({todos.length})
+                            {t('calendar.tasks_section')} ({todos.length})
                         </h3>
                         {todos.length === 0 ? (
-                            <p className="text-sm italic" style={{ color: 'var(--color-text-muted)' }}>No tasks recorded.</p>
+                            <p className="text-sm italic" style={{ color: 'var(--color-text-muted)' }}>{t('calendar.no_tasks')}</p>
                         ) : (
                             <ul className="space-y-2">
                                 {todos.map(todo => (
@@ -58,16 +61,16 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
                     {/* Journal Section */}
                     <div>
                         <h3 className="text-sm font-medium mb-3 uppercase tracking-wider" style={{ color: 'var(--color-text-secondary)' }}>
-                            Journal Entries ({entries.length})
+                            {t('calendar.journal_section')} ({entries.length})
                         </h3>
                         {entries.length === 0 ? (
-                            <p className="text-sm italic" style={{ color: 'var(--color-text-muted)' }}>No journal entries.</p>
+                            <p className="text-sm italic" style={{ color: 'var(--color-text-muted)' }}>{t('calendar.no_entries')}</p>
                         ) : (
                             <div className="space-y-3">
                                 {entries.map(entry => (
                                     <div key={entry.id} className="p-3 rounded-lg border" style={{ borderColor: 'var(--color-border)' }}>
                                         <p className="text-xs mb-1" style={{ color: 'var(--color-text-tertiary)' }}>
-                                            {new Date(entry.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(entry.date).toLocaleTimeString(language, { hour: '2-digit', minute: '2-digit' })}
                                         </p>
                                         <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--color-text-primary)' }}>
                                             {entry.text}
