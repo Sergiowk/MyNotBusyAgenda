@@ -4,6 +4,7 @@ import { useTodos } from '../hooks/useTodos';
 import { useClock } from '../hooks/useClock';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Circle, ArrowRight } from 'lucide-react';
+import Calendar from '../components/Calendar';
 import clsx from 'clsx';
 
 export default function Dashboard() {
@@ -92,6 +93,8 @@ export default function Dashboard() {
                     </div>
                 </Link>
             </div>
+
+            <Calendar />
         </div>
     );
 }
