@@ -1,5 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import logo from '../assets/logo.png';
 
 
 export default function Login() {
@@ -18,7 +19,8 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center font-sans" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
             <div className="w-full max-w-md p-8">
                 <div className="text-center mb-8">
-                    <h1 className="text-5xl font-serif font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                    <img src={logo} alt="MyNotBusyAgenda Logo" className="h-50 w-100 mx-auto mb-4" />
+                    <h1 className="text-3xl md:text-5xl font-serif font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                         MyNotBusyAgenda
                     </h1>
                     <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>

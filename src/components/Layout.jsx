@@ -4,6 +4,7 @@ import { useDarkMode } from '../hooks/useDarkMode';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import clsx from 'clsx';
+import logo from '../assets/logo.png';
 
 export default function Layout() {
     const location = useLocation();
@@ -27,9 +28,12 @@ export default function Layout() {
     return (
         <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-200 pb-20">
             <header className="px-6 py-4 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md bg-[var(--color-bg-primary)]/80 border-b border-[var(--color-border)]">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                    MyNotBusyAgenda
-                </h1>
+                <div className="flex items-center gap-3">
+                    <img src={logo} alt="MyNotBusyAgenda Logo" className="h-10 w-16" />
+                    <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+                        MyNotBusyAgenda
+                    </h1>
+                </div>
                 <div className="flex items-center gap-4">
                     <LanguageSelector />
                     <button
