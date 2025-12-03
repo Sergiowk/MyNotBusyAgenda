@@ -5,6 +5,7 @@ import { useClock } from '../hooks/useClock';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Circle, ArrowRight } from 'lucide-react';
 import Calendar from '../components/Calendar';
+import DaySummaryModal from '../components/DaySummaryModal';
 import clsx from 'clsx';
 
 export default function Dashboard() {
@@ -12,12 +13,19 @@ export default function Dashboard() {
     const { todos } = useTodos();
     const { greeting, formattedTime } = useClock();
     const [isEditing, setIsEditing] = useState(!focus.text);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [showSummary, setShowSummary] = useState(false);
 
     const pendingTodos = todos.filter(t => !t.completed).length;
 
     const handleFocusSubmit = (e) => {
         e.preventDefault();
         setIsEditing(false);
+    };
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
+        setShowSummary(true);
     };
 
     return (
@@ -94,7 +102,13 @@ export default function Dashboard() {
                 </Link>
             </div>
 
-            <Calendar />
+            <Calendar onDateSelect={handleDateSelect} selectedDate={selectedDate} />
+
+            <DaySummaryModal
+                isOpen={showSummary}
+                onClose={() => setShowSummary(false)}
+                date={selectedDate}
+            />
         </div>
     );
 }

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 
-export function useTodos() {
+export function useTodos(date = null) {
     const [todos, setTodos] = useState([]);
     const { user } = useAuth();
 
@@ -14,7 +14,23 @@ export function useTodos() {
         }
 
         const todosRef = collection(db, 'users', user.uid, 'todos');
-        const q = query(todosRef, orderBy('createdAt', 'desc'));
+        let q;
+
+        if (date) {
+            const start = new Date(date);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(date);
+            end.setHours(23, 59, 59, 999);
+
+            q = query(
+                todosRef,
+                where('createdAt', '>=', start),
+                where('createdAt', '<=', end),
+                orderBy('createdAt', 'desc')
+            );
+        } else {
+            q = query(todosRef, orderBy('createdAt', 'desc'));
+        }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const todosData = snapshot.docs.map(doc => ({
@@ -25,7 +41,7 @@ export function useTodos() {
         });
 
         return unsubscribe;
-    }, [user]);
+    }, [user, date]);
 
     const addTodo = async (text, category = 'general') => {
         if (!text.trim() || !user) return;

@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X } from 'lucide-react';
 import clsx from 'clsx';
+import HistoryModal from '../components/HistoryModal';
 
 export default function Todos() {
-    const { todos, addTodo, toggleTodo, deleteTodo } = useTodos();
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [showHistory, setShowHistory] = useState(false);
+    const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedDate);
     const [input, setInput] = useState('');
 
     const handleSubmit = (e) => {
@@ -15,39 +18,71 @@ export default function Todos() {
         }
     };
 
+    const isHistoryView = !!selectedDate;
+
     return (
         <div className="space-y-6">
-            <header>
-                <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Tasks</h1>
-                <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Organize your day.</p>
+            <header className="flex items-start justify-between">
+                <div>
+                    <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
+                        {isHistoryView ? 'Past Tasks' : 'Tasks'}
+                    </h1>
+                    <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                        {isHistoryView
+                            ? `Viewing tasks for ${selectedDate.toLocaleDateString()}`
+                            : 'Organize your day.'}
+                    </p>
+                </div>
+                <div className="flex gap-2">
+                    {isHistoryView && (
+                        <button
+                            onClick={() => setSelectedDate(null)}
+                            className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}
+                            title="Clear filter"
+                        >
+                            <X size={24} />
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setShowHistory(true)}
+                        className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                        title="View History"
+                    >
+                        <Clock size={24} />
+                    </button>
+                </div>
             </header>
 
-            <form onSubmit={handleSubmit} className="relative">
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Add a new task..."
-                    className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
-                    style={{
-                        backgroundColor: 'var(--color-bg-card)',
-                        borderColor: 'var(--color-border)',
-                        color: 'var(--color-text-primary)'
-                    }}
-                />
-                <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white rounded-lg transition-colors"
-                    style={{ backgroundColor: 'var(--color-accent)' }}
-                >
-                    <Plus size={20} />
-                </button>
-            </form>
+            {!isHistoryView && (
+                <form onSubmit={handleSubmit} className="relative">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Add a new task..."
+                        className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
+                        style={{
+                            backgroundColor: 'var(--color-bg-card)',
+                            borderColor: 'var(--color-border)',
+                            color: 'var(--color-text-primary)'
+                        }}
+                    />
+                    <button
+                        type="submit"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white rounded-lg transition-colors"
+                        style={{ backgroundColor: 'var(--color-accent)' }}
+                    >
+                        <Plus size={20} />
+                    </button>
+                </form>
+            )}
 
             <div className="space-y-3">
                 {todos.length === 0 ? (
                     <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
-                        <p>No tasks yet. Add one above!</p>
+                        <p>{isHistoryView ? 'No tasks found for this date.' : 'No tasks yet. Add one above!'}</p>
                     </div>
                 ) : (
                     todos.map((todo) => (
@@ -62,6 +97,7 @@ export default function Todos() {
                             <button
                                 onClick={() => toggleTodo(todo.id)}
                                 className="flex items-center gap-3 flex-1 text-left"
+                                disabled={isHistoryView} // Disable toggling in history view? Maybe allow it? User didn't specify. I'll allow it for now but maybe it should be read-only. Let's keep it interactive.
                             >
                                 {todo.completed ? (
                                     <CheckCircle className="text-green-600" size={24} />
@@ -76,18 +112,27 @@ export default function Todos() {
                                 </span>
                             </button>
 
-                            <button
-                                onClick={() => deleteTodo(todo.id)}
-                                className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                style={{ color: 'var(--color-text-muted)' }}
-                                aria-label="Delete task"
-                            >
-                                <Trash2 size={20} />
-                            </button>
+                            {!isHistoryView && (
+                                <button
+                                    onClick={() => deleteTodo(todo.id)}
+                                    className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                    style={{ color: 'var(--color-text-muted)' }}
+                                    aria-label="Delete task"
+                                >
+                                    <Trash2 size={20} />
+                                </button>
+                            )}
                         </div>
                     ))
                 )}
             </div>
+
+            <HistoryModal
+                isOpen={showHistory}
+                onClose={() => setShowHistory(false)}
+                onDateSelect={setSelectedDate}
+                selectedDate={selectedDate}
+            />
         </div>
     );
 }
