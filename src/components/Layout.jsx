@@ -14,12 +14,13 @@ export default function Layout() {
     ];
 
     return (
-        <div className="min-h-screen bg-beige-100 dark:bg-gray-900 text-brown-800 dark:text-white font-sans flex justify-center transition-colors duration-200">
-            <div className="w-full max-w-md bg-beige-50 dark:bg-gray-800 min-h-screen shadow-xl relative">
+        <div className="min-h-screen font-sans flex justify-center transition-colors duration-200" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+            <div className="w-full max-w-md min-h-screen shadow-xl relative" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                 <header className="absolute top-0 right-0 p-4 z-20">
                     <button
                         onClick={toggleDarkMode}
-                        className="p-2 rounded-lg bg-beige-200 dark:bg-gray-700 text-brown-700 dark:text-white hover:bg-beige-300 dark:hover:bg-gray-600 transition-colors"
+                        className="p-2 rounded-lg transition-colors"
+                        style={{ backgroundColor: 'var(--color-bg-hover)', color: 'var(--color-text-secondary)' }}
                         aria-label="Toggle dark mode"
                     >
                         {isDark ? <Sun size={20} /> : <Moon size={20} />}
@@ -30,17 +31,16 @@ export default function Layout() {
                     <Outlet />
                 </main>
 
-                <nav className="absolute bottom-0 left-0 right-0 bg-beige-50/80 dark:bg-gray-800/80 backdrop-blur-md border-t border-beige-200 dark:border-gray-700 px-8 py-4 flex justify-between items-center z-10">
+                <nav className="absolute bottom-0 left-0 right-0 backdrop-blur-md px-8 py-4 flex justify-between items-center z-10" style={{ backgroundColor: 'var(--color-bg-secondary)' + 'cc', borderTop: '1px solid var(--color-border)' }}>
                     {navItems.map(({ path, icon: Icon, label }) => (
                         <Link
                             key={path}
                             to={path}
                             className={clsx(
                                 "flex flex-col items-center gap-1 transition-all duration-200",
-                                location.pathname === path
-                                    ? "text-brown-700 dark:text-white scale-110"
-                                    : "text-brown-400 dark:text-gray-400 hover:text-brown-600 dark:hover:text-gray-300"
+                                location.pathname === path ? "scale-110" : ""
                             )}
+                            style={{ color: location.pathname === path ? 'var(--color-text-primary)' : 'var(--color-text-muted)' }}
                         >
                             <Icon size={24} strokeWidth={location.pathname === path ? 2.5 : 2} />
                             <span className="text-[10px] font-medium tracking-wide">{label}</span>

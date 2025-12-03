@@ -18,8 +18,8 @@ export default function Todos() {
     return (
         <div className="space-y-6">
             <header>
-                <h1 className="text-4xl font-serif font-bold text-brown-900 dark:text-white tracking-tight">Tasks</h1>
-                <p className="text-brown-600 dark:text-gray-300 mt-1">Organize your day.</p>
+                <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Tasks</h1>
+                <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Organize your day.</p>
             </header>
 
             <form onSubmit={handleSubmit} className="relative">
@@ -28,11 +28,17 @@ export default function Todos() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Add a new task..."
-                    className="w-full p-4 pr-12 rounded-xl bg-white dark:bg-gray-700 border border-beige-200 dark:border-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-brown-600 dark:focus:ring-brown-400 focus:border-transparent transition-all text-brown-800 dark:text-white placeholder-brown-400 dark:placeholder-gray-400"
+                    className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
+                    style={{
+                        backgroundColor: 'var(--color-bg-card)',
+                        borderColor: 'var(--color-border)',
+                        color: 'var(--color-text-primary)'
+                    }}
                 />
                 <button
                     type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-brown-700 dark:bg-brown-600 text-white rounded-lg hover:bg-brown-800 dark:hover:bg-brown-700 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white rounded-lg transition-colors"
+                    style={{ backgroundColor: 'var(--color-accent)' }}
                 >
                     <Plus size={20} />
                 </button>
@@ -40,7 +46,7 @@ export default function Todos() {
 
             <div className="space-y-3">
                 {todos.length === 0 ? (
-                    <div className="text-center py-12 text-brown-400 dark:text-gray-400">
+                    <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
                         <p>No tasks yet. Add one above!</p>
                     </div>
                 ) : (
@@ -48,24 +54,23 @@ export default function Todos() {
                         <div
                             key={todo.id}
                             className={clsx(
-                                "group flex items-center justify-between p-4 rounded-xl bg-white dark:bg-gray-700 border border-beige-200 dark:border-gray-600 shadow-sm transition-all hover:shadow-md",
-                                todo.completed && "bg-beige-100 dark:bg-gray-800 opacity-75"
+                                "group flex items-center justify-between p-4 rounded-xl border shadow-sm transition-all hover:shadow-md",
+                                todo.completed && "opacity-75"
                             )}
+                            style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}
                         >
                             <button
                                 onClick={() => toggleTodo(todo.id)}
                                 className="flex items-center gap-3 flex-1 text-left"
                             >
                                 {todo.completed ? (
-                                    <CheckCircle className="text-green-600 dark:text-green-500" size={24} />
+                                    <CheckCircle className="text-green-600" size={24} />
                                 ) : (
-                                    <Circle className="text-brown-300 dark:text-gray-500 group-hover:text-brown-600 dark:group-hover:text-brown-400 transition-colors" size={24} />
+                                    <Circle size={24} style={{ color: 'var(--color-text-muted)' }} />
                                 )}
                                 <span
-                                    className={clsx(
-                                        "text-lg transition-all",
-                                        todo.completed ? "text-brown-400 dark:text-gray-500 line-through" : "text-brown-800 dark:text-white"
-                                    )}
+                                    className={clsx("text-lg transition-all", todo.completed && "line-through")}
+                                    style={{ color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)' }}
                                 >
                                     {todo.text}
                                 </span>
@@ -73,7 +78,8 @@ export default function Todos() {
 
                             <button
                                 onClick={() => deleteTodo(todo.id)}
-                                className="p-2 text-brown-300 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                style={{ color: 'var(--color-text-muted)' }}
                                 aria-label="Delete task"
                             >
                                 <Trash2 size={20} />
