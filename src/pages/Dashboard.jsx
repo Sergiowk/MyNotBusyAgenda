@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useFocus } from '../hooks/useFocus';
 import { useTodos } from '../hooks/useTodos';
+import { useClock } from '../hooks/useClock';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Circle, ArrowRight } from 'lucide-react';
 import clsx from 'clsx';
@@ -8,6 +9,7 @@ import clsx from 'clsx';
 export default function Dashboard() {
     const { focus, setFocusText, toggleFocus } = useFocus();
     const { todos } = useTodos();
+    const { greeting, formattedTime } = useClock();
     const [isEditing, setIsEditing] = useState(!focus.text);
 
     const pendingTodos = todos.filter(t => !t.completed).length;
@@ -19,9 +21,16 @@ export default function Dashboard() {
 
     return (
         <div className="space-y-8">
-            <header>
-                <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Good Morning</h1>
-                <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Ready for a clear mind?</p>
+            <header className="flex items-start justify-between">
+                <div>
+                    <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>{greeting}</h1>
+                    <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>Ready for a clear mind?</p>
+                </div>
+                <div className="text-right">
+                    <div className="text-3xl font-semibold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
+                        {formattedTime}
+                    </div>
+                </div>
             </header>
 
             <div className="p-6 rounded-2xl border" style={{ backgroundColor: 'var(--color-bg-hover)', borderColor: 'var(--color-border)' }}>
