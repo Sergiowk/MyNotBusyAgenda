@@ -35,6 +35,7 @@ export default function LanguageSelector() {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors text-sm font-medium"
+                style={{ color: 'var(--color-text-primary)' }}
             >
                 <span className="text-lg">{currentLang.flag}</span>
                 <span className="hidden md:inline">{currentLang.name}</span>
@@ -53,8 +54,9 @@ export default function LanguageSelector() {
                                 setLanguage(lang.code);
                                 setIsOpen(false);
                             }}
-                            className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-[var(--color-bg-secondary)] transition-colors ${language === lang.code ? 'bg-[var(--color-bg-secondary)] text-[var(--color-primary)]' : ''
+                            className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-[var(--color-bg-secondary)] transition-colors ${language === lang.code ? 'bg-[var(--color-bg-secondary)]' : ''
                                 }`}
+                            style={{ color: 'var(--color-text-primary)' }}
                         >
                             <span className="text-lg">{lang.flag}</span>
                             <span className="text-sm">{lang.name}</span>

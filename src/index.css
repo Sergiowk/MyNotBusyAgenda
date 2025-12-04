@@ -63,3 +63,13 @@
   --color-accent: #d1bd9f;
   --color-accent-hover: #c4a882;
 }
+
+/* Dark mode gradient background */
+.dark body {
+  background: linear-gradient(to right, #0f172a 0%, #1e293b 15%, #1e293b 85%, #0f172a 100%) !important;
+}
+
+/* Enhanced shadow for dark mode */
+.dark #root {
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+}

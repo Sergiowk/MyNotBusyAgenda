@@ -27,6 +27,7 @@ export default function Login() {
                 <button
                     onClick={toggleDarkMode}
                     className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                    style={{ color: 'var(--color-text-primary)' }}
                 >
                     {isDark ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
