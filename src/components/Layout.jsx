@@ -26,13 +26,10 @@ export default function Layout() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-200 pb-20">
+        <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-200 pb-20 relative">
             <header className="px-6 py-4 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md bg-[var(--color-bg-primary)]/80 border-b border-[var(--color-border)]">
                 <div className="flex items-center gap-3">
                     <img src={logo} alt="MyNotBusyAgenda Logo" className="h-10 w-16" />
-                    <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
-                        MyNotBusyAgenda
-                    </h1>
                 </div>
                 <div className="flex items-center gap-4">
                     <LanguageSelector />
@@ -55,7 +52,7 @@ export default function Layout() {
                 <Outlet />
             </main>
 
-            <nav className="fixed bottom-0 left-0 right-0 backdrop-blur-md px-8 py-4 flex justify-between items-center z-10" style={{ backgroundColor: 'var(--color-bg-secondary)' + 'cc', borderTop: '1px solid var(--color-border)' }}>
+            <nav className="absolute bottom-0 left-0 right-0 backdrop-blur-md px-8 py-4 flex justify-between items-center z-10" style={{ backgroundColor: 'var(--color-bg-secondary)' + 'cc', borderTop: '1px solid var(--color-border)' }}>
                 {navItems.map(({ path, icon: Icon, label }) => (
                     <Link
                         key={path}

@@ -20,7 +20,7 @@ export default function Login() {
             <div className="w-full max-w-md p-8">
                 <div className="text-center mb-8">
                     <img src={logo} alt="MyNotBusyAgenda Logo" className="h-50 w-100 mx-auto mb-4" />
-                    <h1 className="text-3xl md:text-5xl font-serif font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                    <h1 className="text-3xl font-serif font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                         MyNotBusyAgenda
                     </h1>
                     <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
