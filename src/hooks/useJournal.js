@@ -29,7 +29,18 @@ export function useJournal(date = null) {
                 orderBy('date', 'desc')
             );
         } else {
-            q = query(entriesRef, orderBy('date', 'desc'));
+            // Only show today's entries in the main view
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const endOfDay = new Date();
+            endOfDay.setHours(23, 59, 59, 999);
+
+            q = query(
+                entriesRef,
+                where('date', '>=', today),
+                where('date', '<=', endOfDay),
+                orderBy('date', 'desc')
+            );
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
