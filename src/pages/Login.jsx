@@ -1,11 +1,15 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useDarkMode } from '../hooks/useDarkMode';
+import { Moon, Sun } from 'lucide-react';
+import LanguageSelector from '../components/LanguageSelector';
 import logo from '../assets/logo.png';
 
 
 export default function Login() {
     const { signInWithGoogle } = useAuth();
     const { t } = useLanguage();
+    const { isDark, toggleDarkMode } = useDarkMode();
 
     const handleGoogleSignIn = async () => {
         try {
@@ -16,7 +20,18 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center font-sans" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+        <div className="min-h-screen flex items-center justify-center font-sans relative" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+            {/* Top right controls */}
+            <div className="absolute top-4 right-4 flex items-center gap-2">
+                <LanguageSelector />
+                <button
+                    onClick={toggleDarkMode}
+                    className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                >
+                    {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
+            </div>
+
             <div className="w-full max-w-md p-8">
                 <div className="text-center mb-8">
                     <img src={logo} alt="MyNotBusyAgenda Logo" className="h-50 w-100 mx-auto mb-4" />
