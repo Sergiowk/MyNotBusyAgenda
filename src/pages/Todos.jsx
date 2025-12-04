@@ -118,7 +118,12 @@ export default function Todos() {
                                     <div className="flex-1">
                                         <span
                                             className={clsx("text-lg transition-all block", todo.completed && "line-through")}
-                                            style={{ color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)' }}
+                                            style={{
+                                                color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
+                                                wordWrap: 'break-word',
+                                                overflowWrap: 'break-word',
+                                                wordBreak: 'break-word'
+                                            }}
                                         >
                                             {todo.text}
                                         </span>

@@ -105,7 +105,17 @@ export default function Journal() {
                                     </button>
                                 )}
                             </div>
-                            <p className="whitespace-pre-wrap" style={{ color: 'var(--color-text-primary)' }}>{entry.text}</p>
+                            <p
+                                className="whitespace-pre-wrap"
+                                style={{
+                                    color: 'var(--color-text-primary)',
+                                    wordWrap: 'break-word',
+                                    overflowWrap: 'break-word',
+                                    wordBreak: 'break-word'
+                                }}
+                            >
+                                {entry.text}
+                            </p>
                         </div>
                     ))
                 )}
