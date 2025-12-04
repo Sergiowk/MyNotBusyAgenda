@@ -61,15 +61,18 @@ export function useTodos(date = null) {
         return unsubscribe;
     }, [user, date]);
 
-    const addTodo = async (text, category = 'general') => {
+    const addTodo = async (text, category = 'general', customDate = null) => {
         if (!text.trim() || !user) return;
 
         try {
+            // Use customDate if provided, otherwise use current date/time
+            const createdAt = customDate || new Date();
+
             await addDoc(collection(db, 'users', user.uid, 'todos'), {
                 text,
                 completed: false,
                 category,
-                createdAt: new Date(),
+                createdAt,
             });
         } catch (error) {
             console.error('Error adding todo:', error);

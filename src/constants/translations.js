@@ -48,6 +48,8 @@ export const translations = {
             empty_past: "No tasks found for this date.",
             delete_label: "Delete task",
             created: "Created",
+            select_date: "Select date",
+            for_date: "For",
         },
         journal: {
             title: "Journal",
@@ -117,6 +119,8 @@ export const translations = {
             empty_past: "No se encontraron tareas para esta fecha.",
             delete_label: "Eliminar tarea",
             created: "Creada",
+            select_date: "Seleccionar fecha",
+            for_date: "Para",
         },
         journal: {
             title: "Diario",
@@ -186,6 +190,8 @@ export const translations = {
             empty_past: "该日期没有找到任务。",
             delete_label: "删除任务",
             created: "创建于",
+            select_date: "选择日期",
+            for_date: "用于",
         },
         journal: {
             title: "日记",
@@ -255,6 +261,8 @@ export const translations = {
             empty_past: "Aucune tâche trouvée pour cette date.",
             delete_label: "Supprimer la tâche",
             created: "Créé",
+            select_date: "Sélectionner une date",
+            for_date: "Pour",
         },
         journal: {
             title: "Journal",
@@ -324,6 +332,8 @@ export const translations = {
             empty_past: "Keine Aufgaben für dieses Datum gefunden.",
             delete_label: "Aufgabe löschen",
             created: "Erstellt",
+            select_date: "Datum auswählen",
+            for_date: "Für",
         },
         journal: {
             title: "Journal",

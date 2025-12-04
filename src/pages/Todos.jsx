@@ -3,11 +3,13 @@ import { useTodos } from '../hooks/useTodos';
 import { Plus, Trash2, CheckCircle, Circle, Clock, X } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
+import DatePickerButton from '../components/DatePickerButton';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [taskDate, setTaskDate] = useState(null); // Date for new task creation
     const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedDate);
     const [input, setInput] = useState('');
     const { t } = useLanguage();
@@ -15,8 +17,11 @@ export default function Todos() {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (input.trim()) {
-            addTodo(input);
+            // If taskDate is selected, set the time to start of day, otherwise use current date/time
+            const dateToUse = taskDate ? new Date(taskDate.setHours(0, 0, 0, 0)) : null;
+            addTodo(input, 'general', dateToUse);
             setInput('');
+            setTaskDate(null); // Reset date after adding task
         }
     };
 
@@ -64,20 +69,27 @@ export default function Todos() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder={t('tasks.placeholder')}
-                        className="w-full p-4 pr-12 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
+                        className="w-full p-4 pr-32 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
                         style={{
                             backgroundColor: 'var(--color-bg-card)',
                             borderColor: 'var(--color-border)',
                             color: 'var(--color-text-primary)'
                         }}
                     />
-                    <button
-                        type="submit"
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-white rounded-lg transition-colors"
-                        style={{ backgroundColor: 'var(--color-accent)' }}
-                    >
-                        <Plus size={20} />
-                    </button>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <DatePickerButton
+                            selectedDate={taskDate}
+                            onDateChange={setTaskDate}
+                        />
+                        <div className="w-px h-6 mx-1" style={{ backgroundColor: 'var(--color-border)' }} />
+                        <button
+                            type="submit"
+                            className="p-2 text-white rounded-lg transition-colors"
+                            style={{ backgroundColor: 'var(--color-accent)' }}
+                        >
+                            <Plus size={20} />
+                        </button>
+                    </div>
                 </form>
             )}
 
