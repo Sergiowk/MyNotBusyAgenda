@@ -87,45 +87,62 @@ export default function Todos() {
                         <p>{isHistoryView ? t('tasks.empty_past') : t('tasks.empty')}</p>
                     </div>
                 ) : (
-                    todos.map((todo) => (
-                        <div
-                            key={todo.id}
-                            className={clsx(
-                                "group flex items-center justify-between p-4 rounded-xl border shadow-sm transition-all hover:shadow-md",
-                                todo.completed && "opacity-75"
-                            )}
-                            style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}
-                        >
-                            <button
-                                onClick={() => toggleTodo(todo.id)}
-                                className="flex items-center gap-3 flex-1 text-left"
-                                disabled={isHistoryView}
-                            >
-                                {todo.completed ? (
-                                    <CheckCircle className="text-green-600" size={24} />
-                                ) : (
-                                    <Circle size={24} style={{ color: 'var(--color-text-muted)' }} />
-                                )}
-                                <span
-                                    className={clsx("text-lg transition-all", todo.completed && "line-through")}
-                                    style={{ color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)' }}
-                                >
-                                    {todo.text}
-                                </span>
-                            </button>
+                    todos.map((todo) => {
+                        // Check if task is overdue (created before today and not completed)
+                        const todoDate = new Date(todo.createdAt.toDate());
+                        todoDate.setHours(0, 0, 0, 0);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const isOverdue = !todo.completed && todoDate.getTime() < today.getTime();
 
-                            {!isHistoryView && (
+                        return (
+                            <div
+                                key={todo.id}
+                                className={clsx(
+                                    "group flex items-center justify-between rounded-xl border shadow-sm transition-all hover:shadow-md",
+                                    todo.completed && "opacity-75",
+                                    isOverdue ? "p-5" : "p-4"
+                                )}
+                                style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}
+                            >
                                 <button
-                                    onClick={() => deleteTodo(todo.id)}
-                                    className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                    style={{ color: 'var(--color-text-muted)' }}
-                                    aria-label={t('tasks.delete_label')}
+                                    onClick={() => toggleTodo(todo.id)}
+                                    className="flex items-start gap-3 flex-1 text-left"
+                                    disabled={isHistoryView}
                                 >
-                                    <Trash2 size={20} />
+                                    {todo.completed ? (
+                                        <CheckCircle className="text-green-600 mt-0.5" size={24} />
+                                    ) : (
+                                        <Circle className="mt-0.5" size={24} style={{ color: 'var(--color-text-muted)' }} />
+                                    )}
+                                    <div className="flex-1">
+                                        <span
+                                            className={clsx("text-lg transition-all block", todo.completed && "line-through")}
+                                            style={{ color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)' }}
+                                        >
+                                            {todo.text}
+                                        </span>
+                                        {isOverdue && (
+                                            <span className="text-sm mt-1 block" style={{ color: '#ef4444' }}>
+                                                {t('tasks.created')}: {todoDate.toLocaleDateString()}
+                                            </span>
+                                        )}
+                                    </div>
                                 </button>
-                            )}
-                        </div>
-                    ))
+
+                                {!isHistoryView && (
+                                    <button
+                                        onClick={() => deleteTodo(todo.id)}
+                                        className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                        style={{ color: 'var(--color-text-muted)' }}
+                                        aria-label={t('tasks.delete_label')}
+                                    >
+                                        <Trash2 size={20} />
+                                    </button>
+                                )}
+                            </div>
+                        );
+                    })
                 )}
             </div>
 

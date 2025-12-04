@@ -33,10 +33,28 @@ export function useTodos(date = null) {
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const todosData = snapshot.docs.map(doc => ({
+            let todosData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+
+            // Filter out completed tasks from previous dates when not in history view
+            if (!date) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                todosData = todosData.filter(todo => {
+                    const todoDate = new Date(todo.createdAt.toDate());
+                    todoDate.setHours(0, 0, 0, 0);
+
+                    // Show all tasks from today, but only incomplete tasks from previous dates
+                    if (todoDate.getTime() < today.getTime()) {
+                        return !todo.completed;
+                    }
+                    return true;
+                });
+            }
+
             setTodos(todosData);
         });
 
