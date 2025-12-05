@@ -1,15 +1,19 @@
-import { X } from 'lucide-react';
+import { X, CheckCircle, Circle } from 'lucide-react';
 import { useTodos } from '../hooks/useTodos';
 
 import { useJournal } from '../hooks/useJournal';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function DaySummaryModal({ isOpen, onClose, date }) {
-    const { todos } = useTodos(date);
+    const { todos, toggleTodo } = useTodos(date);
     const { entries } = useJournal(date);
     const { t, language } = useLanguage();
 
     if (!isOpen || !date) return null;
+
+    const handleToggle = (id) => {
+        toggleTodo(id);
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -41,17 +45,24 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
                         ) : (
                             <ul className="space-y-2">
                                 {todos.map(todo => (
-                                    <li key={todo.id} className="flex items-start gap-2 text-sm">
-                                        <span style={{ color: todo.completed ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
-                                            {todo.completed ? '✓' : '○'}
-                                        </span>
-                                        <span style={{
-                                            color: 'var(--color-text-primary)',
-                                            textDecoration: todo.completed ? 'line-through' : 'none',
-                                            opacity: todo.completed ? 0.7 : 1
-                                        }}>
-                                            {todo.text}
-                                        </span>
+                                    <li key={todo.id}>
+                                        <button
+                                            onClick={() => handleToggle(todo.id)}
+                                            className="flex items-start gap-2 text-sm w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        >
+                                            {todo.completed ? (
+                                                <CheckCircle size={18} className="mt-0.5 shrink-0" style={{ color: 'var(--color-accent)' }} />
+                                            ) : (
+                                                <Circle size={18} className="mt-0.5 shrink-0" style={{ color: 'var(--color-text-muted)' }} />
+                                            )}
+                                            <span style={{
+                                                color: 'var(--color-text-primary)',
+                                                textDecoration: todo.completed ? 'line-through' : 'none',
+                                                opacity: todo.completed ? 0.7 : 1
+                                            }}>
+                                                {todo.text}
+                                            </span>
+                                        </button>
                                     </li>
                                 ))}
                             </ul>

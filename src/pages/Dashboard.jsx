@@ -11,7 +11,7 @@ import clsx from 'clsx';
 
 export default function Dashboard() {
     const { focus, setFocusText, toggleFocus } = useFocus();
-    const { todos } = useTodos();
+    const { todos, toggleTodo } = useTodos();
     const { greeting, formattedTime } = useClock();
     const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(!focus.text);

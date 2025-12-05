@@ -120,7 +120,6 @@ export default function Todos() {
                                 <button
                                     onClick={() => toggleTodo(todo.id)}
                                     className="flex items-start gap-3 flex-1 text-left"
-                                    disabled={isHistoryView}
                                 >
                                     {todo.completed ? (
                                         <CheckCircle className="text-green-600 mt-0.5" size={24} />
