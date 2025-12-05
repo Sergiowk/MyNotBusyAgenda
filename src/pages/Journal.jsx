@@ -22,7 +22,7 @@ export default function Journal() {
     const isHistoryView = !!selectedDate;
 
     return (
-        <div className="space-y-6">
+        <div className="content-container space-y-6">
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
