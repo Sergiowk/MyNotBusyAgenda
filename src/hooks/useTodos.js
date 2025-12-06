@@ -38,7 +38,7 @@ export function useTodos(date = null) {
                 ...doc.data()
             }));
 
-            // Filter out completed tasks from previous dates when not in history view
+            // Filter out completed tasks from previous dates and future tasks when not in history view
             if (!date) {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
@@ -46,6 +46,11 @@ export function useTodos(date = null) {
                 todosData = todosData.filter(todo => {
                     const todoDate = new Date(todo.createdAt.toDate());
                     todoDate.setHours(0, 0, 0, 0);
+
+                    // Exclude future tasks
+                    if (todoDate.getTime() > today.getTime()) {
+                        return false;
+                    }
 
                     // Show all tasks from today, but only incomplete tasks from previous dates
                     if (todoDate.getTime() < today.getTime()) {
@@ -103,5 +108,21 @@ export function useTodos(date = null) {
         }
     };
 
-    return { todos, addTodo, toggleTodo, deleteTodo };
+    const rescheduleTodo = async (id, newDate) => {
+        if (!user) return;
+
+        try {
+            const todoRef = doc(db, 'users', user.uid, 'todos', id);
+            const rescheduleDate = new Date(newDate);
+            rescheduleDate.setHours(0, 0, 0, 0);
+
+            await updateDoc(todoRef, {
+                createdAt: rescheduleDate
+            });
+        } catch (error) {
+            console.error('Error rescheduling todo:', error);
+        }
+    };
+
+    return { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo };
 }

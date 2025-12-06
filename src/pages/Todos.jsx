@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle, Clock, X } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
 import DatePickerButton from '../components/DatePickerButton';
@@ -10,8 +10,9 @@ export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const [taskDate, setTaskDate] = useState(null); // Date for new task creation
-    const { todos, addTodo, toggleTodo, deleteTodo } = useTodos(selectedDate);
+    const { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo } = useTodos(selectedDate);
     const [input, setInput] = useState('');
+    const [reschedulingTask, setReschedulingTask] = useState(null); // Track which task is being rescheduled
     const { t } = useLanguage();
 
     const handleSubmit = (e) => {
@@ -147,14 +148,39 @@ export default function Todos() {
                                 </button>
 
                                 {!isHistoryView && (
-                                    <button
-                                        onClick={() => deleteTodo(todo.id)}
-                                        className="p-2 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
-                                        style={{ color: 'var(--color-text-muted)' }}
-                                        aria-label={t('tasks.delete_label')}
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        {/* Reschedule button */}
+                                        {reschedulingTask === todo.id ? (
+                                            <DatePickerButton
+                                                selectedDate={null}
+                                                onDateChange={(newDate) => {
+                                                    if (newDate) {
+                                                        rescheduleTodo(todo.id, newDate);
+                                                    }
+                                                    setReschedulingTask(null);
+                                                }}
+                                                autoOpen={true}
+                                            />
+                                        ) : (
+                                            <button
+                                                onClick={() => setReschedulingTask(todo.id)}
+                                                className="p-2 hover:text-blue-600 transition-colors"
+                                                style={{ color: 'var(--color-text-muted)' }}
+                                                aria-label="Reschedule task"
+                                            >
+                                                <Calendar size={20} />
+                                            </button>
+                                        )}
+                                        {/* Delete button - always visible for mobile */}
+                                        <button
+                                            onClick={() => deleteTodo(todo.id)}
+                                            className="p-2 hover:text-red-600 transition-colors"
+                                            style={{ color: 'var(--color-text-muted)' }}
+                                            aria-label={t('tasks.delete_label')}
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         );

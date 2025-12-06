@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export default function DatePickerButton({ selectedDate, onDateChange }) {
-    const [isOpen, setIsOpen] = useState(false);
+export default function DatePickerButton({ selectedDate, onDateChange, autoOpen = false }) {
+    const [isOpen, setIsOpen] = useState(autoOpen);
     const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
     const [position, setPosition] = useState({ top: 0, right: 0 });
     const buttonRef = useRef(null);
@@ -79,28 +79,24 @@ export default function DatePickerButton({ selectedDate, onDateChange }) {
     const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
     const monthName = currentMonth.toLocaleDateString('default', { month: 'long', year: 'numeric' });
 
-    const displayText = selectedDate
-        ? selectedDate.toLocaleDateString('default', { month: 'short', day: 'numeric' })
-        : t('common.today');
-
     return (
         <>
             <button
                 ref={buttonRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                className="flex items-center gap-1.5 p-2 rounded-md transition-all hover:bg-black/5 dark:hover:bg-white/5"
                 style={{
-                    color: selectedDate ? 'var(--color-accent)' : 'var(--color-text-secondary)'
+                    color: selectedDate ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    backgroundColor: selectedDate ? 'var(--color-accent)' + '20' : 'transparent'
                 }}
             >
-                <CalendarIcon size={16} />
-                <span className="text-sm font-medium whitespace-nowrap">{displayText}</span>
+                <CalendarIcon size={18} />
                 {selectedDate && (
                     <X
                         size={14}
                         onClick={handleClearDate}
-                        className="hover:text-red-600 transition-colors ml-0.5"
+                        className="hover:text-red-600 transition-colors"
                     />
                 )}
             </button>
