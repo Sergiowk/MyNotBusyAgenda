@@ -30,16 +30,27 @@ export default function Todos() {
 
     const isHistoryView = !!selectedDate;
 
+    // Determine if selected date is past or future
+    const isFutureDate = selectedDate && (() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(selectedDate);
+        selected.setHours(0, 0, 0, 0);
+        return selected.getTime() > today.getTime();
+    })();
+
     return (
         <div className="content-container space-y-6">
             <header className="flex items-start justify-between">
                 <div>
                     <h1 className="text-4xl font-serif font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
-                        {isHistoryView ? t('tasks.past_title') : t('tasks.title')}
+                        {isHistoryView
+                            ? (isFutureDate ? t('tasks.future_title') : t('tasks.past_title'))
+                            : t('tasks.title')}
                     </h1>
                     <p className="mt-1" style={{ color: 'var(--color-text-secondary)' }}>
                         {isHistoryView
-                            ? `${t('tasks.past_subtitle')} ${selectedDate.toLocaleDateString()}`
+                            ? `${isFutureDate ? t('tasks.future_subtitle') : t('tasks.past_subtitle')} ${selectedDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}`
                             : t('tasks.subtitle')}
                     </p>
                 </div>

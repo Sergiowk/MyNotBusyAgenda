@@ -27,7 +27,19 @@ export default function HistoryModal({ isOpen, onClose, onDateSelect, selectedDa
 
                 <div className="p-4">
                     <Calendar onDateSelect={(date) => {
-                        onDateSelect(date);
+                        // Check if selected date is today
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const selected = new Date(date);
+                        selected.setHours(0, 0, 0, 0);
+
+                        // If today is selected, clear the filter (return to normal view)
+                        // Otherwise, set the selected date to view that specific day
+                        if (selected.getTime() === today.getTime()) {
+                            onDateSelect(null);
+                        } else {
+                            onDateSelect(date);
+                        }
                         onClose();
                     }} selectedDate={selectedDate} />
                 </div>
