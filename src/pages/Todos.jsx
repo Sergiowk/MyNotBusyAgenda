@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
+import IncompleteTasksModal from '../components/IncompleteTasksModal';
 import DatePickerButton from '../components/DatePickerButton';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
     const [taskDate, setTaskDate] = useState(null); // Date for new task creation
     const { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo } = useTodos(selectedDate);
     const [input, setInput] = useState('');
@@ -50,6 +52,16 @@ export default function Todos() {
                             title={t('common.clear_filter')}
                         >
                             <X size={24} />
+                        </button>
+                    )}
+                    {!isHistoryView && (
+                        <button
+                            onClick={() => setShowIncompleteTasks(true)}
+                            className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                            title={t('tasks.view_incomplete')}
+                        >
+                            <List size={24} />
                         </button>
                     )}
                     <button
@@ -193,6 +205,11 @@ export default function Todos() {
                 onClose={() => setShowHistory(false)}
                 onDateSelect={setSelectedDate}
                 selectedDate={selectedDate}
+            />
+
+            <IncompleteTasksModal
+                isOpen={showIncompleteTasks}
+                onClose={() => setShowIncompleteTasks(false)}
             />
         </div>
     );

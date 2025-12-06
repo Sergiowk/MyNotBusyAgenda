@@ -50,6 +50,9 @@ export const translations = {
             created: "Created",
             select_date: "Select date",
             for_date: "For",
+            view_incomplete: "View Incomplete Tasks",
+            incomplete_title: "Incomplete Tasks",
+            no_incomplete: "All tasks completed! Great job!",
         },
         journal: {
             title: "Journal",
@@ -121,6 +124,9 @@ export const translations = {
             created: "Creada",
             select_date: "Seleccionar fecha",
             for_date: "Para",
+            view_incomplete: "Ver Tareas Incompletas",
+            incomplete_title: "Tareas Incompletas",
+            no_incomplete: "¡Todas las tareas completadas! ¡Buen trabajo!",
         },
         journal: {
             title: "Diario",
@@ -192,6 +198,9 @@ export const translations = {
             created: "创建于",
             select_date: "选择日期",
             for_date: "用于",
+            view_incomplete: "查看未完成任务",
+            incomplete_title: "未完成任务",
+            no_incomplete: "所有任务已完成！干得好！",
         },
         journal: {
             title: "日记",
@@ -263,6 +272,9 @@ export const translations = {
             created: "Créé",
             select_date: "Sélectionner une date",
             for_date: "Pour",
+            view_incomplete: "Voir les Tâches Incomplètes",
+            incomplete_title: "Tâches Incomplètes",
+            no_incomplete: "Toutes les tâches terminées ! Bon travail !",
         },
         journal: {
             title: "Journal",
@@ -334,6 +346,9 @@ export const translations = {
             created: "Erstellt",
             select_date: "Datum auswählen",
             for_date: "Für",
+            view_incomplete: "Unvollständige Aufgaben anzeigen",
+            incomplete_title: "Unvollständige Aufgaben",
+            no_incomplete: "Alle Aufgaben erledigt! Tolle Arbeit!",
         },
         journal: {
             title: "Journal",
