@@ -78,6 +78,25 @@ export function useIncompleteTodos() {
             const todo = incompleteTodos.find(t => t.id === id);
             if (!todo) return;
 
+            // Optimistically update the UI by removing the todo immediately
+            setIncompleteTodos(prev => prev.filter(t => t.id !== id));
+
+            // Also update grouped todos
+            setGroupedTodos(prev => {
+                const updated = { ...prev };
+                for (const dateKey in updated) {
+                    updated[dateKey] = {
+                        ...updated[dateKey],
+                        todos: updated[dateKey].todos.filter(t => t.id !== id)
+                    };
+                    // Remove empty date groups
+                    if (updated[dateKey].todos.length === 0) {
+                        delete updated[dateKey];
+                    }
+                }
+                return updated;
+            });
+
             // Schedule the deletion with undo capability
             scheduleDelete(
                 id,
@@ -86,6 +105,29 @@ export function useIncompleteTodos() {
                 // onUndo: restore the todo by adding it back
                 async () => {
                     try {
+                        // Optimistically restore to UI first
+                        setIncompleteTodos(prev => [...prev, todo]);
+
+                        // Also restore to grouped todos
+                        setGroupedTodos(prev => {
+                            const todoDate = new Date(todo.createdAt.toDate());
+                            todoDate.setHours(0, 0, 0, 0);
+                            const dateKey = todoDate.toISOString();
+
+                            const updated = { ...prev };
+                            if (!updated[dateKey]) {
+                                updated[dateKey] = {
+                                    date: todoDate,
+                                    todos: []
+                                };
+                            } else {
+                                updated[dateKey] = { ...updated[dateKey] };
+                            }
+                            updated[dateKey].todos = [...updated[dateKey].todos, todo];
+                            return updated;
+                        });
+
+                        // Then add back to Firebase
                         await addDoc(collection(db, 'users', user.uid, 'todos'), {
                             text: todo.text,
                             completed: todo.completed,
@@ -102,6 +144,8 @@ export function useIncompleteTodos() {
                         await deleteDoc(doc(db, 'users', user.uid, 'todos', id));
                     } catch (error) {
                         console.error('Error deleting todo:', error);
+                        // If deletion fails, we should restore the optimistic update
+                        // The Firebase listener will handle this automatically
                     }
                 }
             );

@@ -14,8 +14,10 @@ export function UndoProvider({ children }) {
             setPendingDelete(null);
         }
 
-        // Execute the deletion immediately
-        onConfirm();
+        // Execute the deletion immediately (with error handling)
+        Promise.resolve(onConfirm()).catch((error) => {
+            console.error('Error during immediate deletion:', error);
+        });
 
         // Set up new pending deletion with undo capability
         const timeoutId = setTimeout(() => {
