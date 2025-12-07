@@ -3,8 +3,10 @@ import { Home, CheckSquare, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
+import UndoSnackbar from './UndoSnackbar';
 import clsx from 'clsx';
 import logo from '../assets/logo.png';
+
 
 export default function Layout() {
     const location = useLocation();
@@ -72,6 +74,9 @@ export default function Layout() {
                     ))}
                 </div>
             </nav>
+
+            {/* Undo Snackbar */}
+            <UndoSnackbar />
         </div>
     );
 }

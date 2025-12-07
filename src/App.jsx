@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { UndoProvider } from './contexts/UndoContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Todos from './pages/Todos';
 import Journal from './pages/Journal';
 import Login from './pages/Login';
+
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -42,9 +44,11 @@ function App() {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <BrowserRouter>
-          <ProtectedRoutes />
-        </BrowserRouter>
+        <UndoProvider>
+          <BrowserRouter>
+            <ProtectedRoutes />
+          </BrowserRouter>
+        </UndoProvider>
       </AuthProvider>
     </LanguageProvider>
   );

@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
+import { useUndo } from '../contexts/UndoContext';
+
 
 export function useTodos(date = null) {
     const [todos, setTodos] = useState([]);
     const { user } = useAuth();
+    const { scheduleDelete } = useUndo();
+
 
     useEffect(() => {
         if (!user) {
@@ -102,11 +106,42 @@ export function useTodos(date = null) {
         if (!user) return;
 
         try {
-            await deleteDoc(doc(db, 'users', user.uid, 'todos', id));
+            // Find the todo to store its data for potential undo
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+
+            // Schedule the deletion with undo capability
+            scheduleDelete(
+                id,
+                'todo',
+                todo,
+                // onUndo: restore the todo by adding it back
+                async () => {
+                    try {
+                        await addDoc(collection(db, 'users', user.uid, 'todos'), {
+                            text: todo.text,
+                            completed: todo.completed,
+                            category: todo.category,
+                            createdAt: todo.createdAt,
+                        });
+                    } catch (error) {
+                        console.error('Error restoring todo:', error);
+                    }
+                },
+                // onConfirm: perform the actual deletion immediately
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'users', user.uid, 'todos', id));
+                    } catch (error) {
+                        console.error('Error deleting todo:', error);
+                    }
+                }
+            );
         } catch (error) {
-            console.error('Error deleting todo:', error);
+            console.error('Error scheduling todo deletion:', error);
         }
     };
+
 
     const rescheduleTodo = async (id, newDate) => {
         if (!user) return;

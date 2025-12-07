@@ -2,10 +2,14 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, deleteDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
+import { useUndo } from '../contexts/UndoContext';
+
 
 export function useJournal(date = null) {
     const [entries, setEntries] = useState([]);
     const { user } = useAuth();
+    const { scheduleDelete } = useUndo();
+
 
     useEffect(() => {
         if (!user) {
@@ -72,11 +76,40 @@ export function useJournal(date = null) {
         if (!user) return;
 
         try {
-            await deleteDoc(doc(db, 'users', user.uid, 'journal', id));
+            // Find the entry to store its data for potential undo
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            // Schedule the deletion with undo capability
+            scheduleDelete(
+                id,
+                'entry',
+                entry,
+                // onUndo: restore the entry by adding it back
+                async () => {
+                    try {
+                        await addDoc(collection(db, 'users', user.uid, 'journal'), {
+                            text: entry.text,
+                            date: new Date(entry.date),
+                        });
+                    } catch (error) {
+                        console.error('Error restoring journal entry:', error);
+                    }
+                },
+                // onConfirm: perform the actual deletion immediately
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'users', user.uid, 'journal', id));
+                    } catch (error) {
+                        console.error('Error deleting journal entry:', error);
+                    }
+                }
+            );
         } catch (error) {
-            console.error('Error deleting journal entry:', error);
+            console.error('Error scheduling journal entry deletion:', error);
         }
     };
+
 
     return { entries, addEntry, deleteEntry };
 }

@@ -11,6 +11,9 @@ export const translations = {
             today: "Today",
             clear_filter: "Clear filter",
             view_history: "View History",
+            undo: "Undo",
+            task_deleted: "Task deleted",
+            entry_deleted: "Entry deleted",
         },
         auth: {
             welcome: "Welcome back",
@@ -87,6 +90,9 @@ export const translations = {
             today: "Hoy",
             clear_filter: "Borrar filtro",
             view_history: "Ver Historial",
+            undo: "Deshacer",
+            task_deleted: "Tarea eliminada",
+            entry_deleted: "Entrada eliminada",
         },
         auth: {
             welcome: "Bienvenido de nuevo",
@@ -163,6 +169,9 @@ export const translations = {
             today: "今天",
             clear_filter: "清除筛选",
             view_history: "查看历史",
+            undo: "撤销",
+            task_deleted: "任务已删除",
+            entry_deleted: "条目已删除",
         },
         auth: {
             welcome: "欢迎回来",
@@ -239,6 +248,9 @@ export const translations = {
             today: "Aujourd'hui",
             clear_filter: "Effacer le filtre",
             view_history: "Voir l'historique",
+            undo: "Annuler",
+            task_deleted: "Tâche supprimée",
+            entry_deleted: "Entrée supprimée",
         },
         auth: {
             welcome: "Bon retour",
@@ -315,6 +327,9 @@ export const translations = {
             today: "Heute",
             clear_filter: "Filter löschen",
             view_history: "Verlauf anzeigen",
+            undo: "Rückgängig",
+            task_deleted: "Aufgabe gelöscht",
+            entry_deleted: "Eintrag gelöscht",
         },
         auth: {
             welcome: "Willkommen zurück",
