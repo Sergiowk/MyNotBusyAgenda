@@ -155,6 +155,39 @@ export function useIncompleteTodos() {
     };
 
 
+
+    const updateTodoText = async (id, newText) => {
+        if (!user || !newText.trim()) return;
+
+        const trimmedText = newText.trim();
+
+        // Optimistic update
+        setIncompleteTodos(prev => prev.map(t => t.id === id ? { ...t, text: trimmedText } : t));
+
+        setGroupedTodos(prev => {
+            const updated = { ...prev };
+            for (const dateKey in updated) {
+                const group = updated[dateKey];
+                if (group.todos.some(t => t.id === id)) {
+                    updated[dateKey] = {
+                        ...group,
+                        todos: group.todos.map(t => t.id === id ? { ...t, text: trimmedText } : t)
+                    };
+                }
+            }
+            return updated;
+        });
+
+        try {
+            const todoRef = doc(db, 'users', user.uid, 'todos', id);
+            await updateDoc(todoRef, {
+                text: trimmedText
+            });
+        } catch (error) {
+            console.error('Error updating todo text:', error);
+        }
+    };
+
     const rescheduleTodo = async (id, newDate) => {
         if (!user) return;
 
@@ -171,5 +204,5 @@ export function useIncompleteTodos() {
         }
     };
 
-    return { incompleteTodos, groupedTodos, toggleTodo, deleteTodo, rescheduleTodo };
+    return { incompleteTodos, groupedTodos, toggleTodo, deleteTodo, updateTodoText, rescheduleTodo };
 }

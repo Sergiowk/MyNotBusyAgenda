@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, CheckCircle, Circle, Calendar, Trash2 } from 'lucide-react';
+import { X, CheckCircle, Circle, Calendar, Trash2, Pencil } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useIncompleteTodos } from '../hooks/useIncompleteTodos';
 import DatePickerButton from './DatePickerButton';
@@ -7,8 +7,36 @@ import clsx from 'clsx';
 
 export default function IncompleteTasksModal({ isOpen, onClose }) {
     const { t } = useLanguage();
-    const { incompleteTodos, groupedTodos, toggleTodo, deleteTodo, rescheduleTodo } = useIncompleteTodos();
+    const { incompleteTodos, groupedTodos, toggleTodo, deleteTodo, rescheduleTodo, updateTodoText } = useIncompleteTodos();
     const [reschedulingTask, setReschedulingTask] = useState(null);
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editText, setEditText] = useState('');
+
+    const startEditing = (todo) => {
+        setEditingTaskId(todo.id);
+        setEditText(todo.text);
+    };
+
+    const saveEdit = () => {
+        if (editingTaskId && editText.trim()) {
+            updateTodoText(editingTaskId, editText);
+            setEditingTaskId(null);
+            setEditText('');
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingTaskId(null);
+        setEditText('');
+    };
+
+    const handleEditKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            saveEdit();
+        } else if (e.key === 'Escape') {
+            cancelEdit();
+        }
+    };
 
     if (!isOpen) return null;
 
@@ -81,30 +109,62 @@ export default function IncompleteTasksModal({ isOpen, onClose }) {
                                                     }}
                                                 >
                                                     {/* Task content */}
-                                                    <button
-                                                        onClick={() => toggleTodo(todo.id)}
-                                                        className="flex items-start gap-3 flex-1 text-left"
-                                                    >
-                                                        <Circle
+                                                    <div className="flex items-start gap-3 flex-1 text-left min-w-0">
+                                                        <button
+                                                            onClick={() => toggleTodo(todo.id)}
                                                             className="mt-0.5 flex-shrink-0"
-                                                            size={20}
-                                                            style={{ color: 'var(--color-text-muted)' }}
-                                                        />
-                                                        <span
-                                                            className="text-base"
-                                                            style={{
-                                                                color: 'var(--color-text-primary)',
-                                                                wordWrap: 'break-word',
-                                                                overflowWrap: 'break-word',
-                                                                wordBreak: 'break-word'
-                                                            }}
                                                         >
-                                                            {todo.text}
-                                                        </span>
-                                                    </button>
+                                                            <Circle
+                                                                size={20}
+                                                                style={{ color: 'var(--color-text-muted)' }}
+                                                            />
+                                                        </button>
+
+                                                        <div className="flex-1 min-w-0">
+                                                            {editingTaskId === todo.id ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editText}
+                                                                    onChange={(e) => setEditText(e.target.value)}
+                                                                    onBlur={saveEdit}
+                                                                    onKeyDown={handleEditKeyDown}
+                                                                    autoFocus
+                                                                    className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5"
+                                                                    style={{ color: 'var(--color-text-primary)' }}
+                                                                />
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => toggleTodo(todo.id)}
+                                                                    className="text-left w-full"
+                                                                >
+                                                                    <span
+                                                                        className="text-base block"
+                                                                        style={{
+                                                                            color: 'var(--color-text-primary)',
+                                                                            wordWrap: 'break-word',
+                                                                            overflowWrap: 'break-word',
+                                                                            wordBreak: 'break-word'
+                                                                        }}
+                                                                    >
+                                                                        {todo.text}
+                                                                    </span>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
 
                                                     {/* Action buttons */}
                                                     <div className="flex items-center gap-1 ml-2">
+                                                        {/* Edit button */}
+                                                        <button
+                                                            onClick={() => startEditing(todo)}
+                                                            className="p-2 hover:text-blue-600 transition-colors"
+                                                            style={{ color: 'var(--color-text-muted)' }}
+                                                            aria-label={t('tasks.edit_label')}
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+
                                                         {/* Reschedule button */}
                                                         {reschedulingTask === todo.id ? (
                                                             <DatePickerButton

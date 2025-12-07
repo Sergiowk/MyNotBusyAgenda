@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
 import IncompleteTasksModal from '../components/IncompleteTasksModal';
@@ -12,10 +12,40 @@ export default function Todos() {
     const [showHistory, setShowHistory] = useState(false);
     const [showIncompleteTasks, setShowIncompleteTasks] = useState(false);
     const [taskDate, setTaskDate] = useState(null); // Date for new task creation
-    const { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo } = useTodos(selectedDate);
+    const { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo, updateTodoText } = useTodos(selectedDate);
     const [input, setInput] = useState('');
     const [reschedulingTask, setReschedulingTask] = useState(null); // Track which task is being rescheduled
     const { t } = useLanguage();
+
+    // Editing state
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editText, setEditText] = useState('');
+
+    const startEditing = (todo) => {
+        setEditingTaskId(todo.id);
+        setEditText(todo.text);
+    };
+
+    const saveEdit = () => {
+        if (editingTaskId && editText.trim()) {
+            updateTodoText(editingTaskId, editText);
+            setEditingTaskId(null);
+            setEditText('');
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditingTaskId(null);
+        setEditText('');
+    };
+
+    const handleEditKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            saveEdit();
+        } else if (e.key === 'Escape') {
+            cancelEdit();
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -141,37 +171,69 @@ export default function Todos() {
                                 )}
                                 style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}
                             >
-                                <button
-                                    onClick={() => toggleTodo(todo.id)}
-                                    className="flex items-start gap-3 flex-1 text-left"
-                                >
-                                    {todo.completed ? (
-                                        <CheckCircle className="text-green-600 mt-0.5" size={24} />
-                                    ) : (
-                                        <Circle className="mt-0.5" size={24} style={{ color: 'var(--color-text-muted)' }} />
-                                    )}
-                                    <div className="flex-1">
-                                        <span
-                                            className={clsx("text-lg transition-all block", todo.completed && "line-through")}
-                                            style={{
-                                                color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
-                                                wordWrap: 'break-word',
-                                                overflowWrap: 'break-word',
-                                                wordBreak: 'break-word'
-                                            }}
-                                        >
-                                            {todo.text}
-                                        </span>
-                                        {isOverdue && (
+                                <div className="flex items-start gap-3 flex-1 text-left min-w-0">
+                                    <button
+                                        onClick={() => toggleTodo(todo.id)}
+                                        className="mt-0.5 flex-shrink-0"
+                                    >
+                                        {todo.completed ? (
+                                            <CheckCircle className="text-green-600" size={24} />
+                                        ) : (
+                                            <Circle size={24} style={{ color: 'var(--color-text-muted)' }} />
+                                        )}
+                                    </button>
+
+                                    <div className="flex-1 min-w-0">
+                                        {editingTaskId === todo.id ? (
+                                            <input
+                                                type="text"
+                                                value={editText}
+                                                onChange={(e) => setEditText(e.target.value)}
+                                                onBlur={saveEdit}
+                                                onKeyDown={handleEditKeyDown}
+                                                autoFocus
+                                                className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5"
+                                                style={{ color: 'var(--color-text-primary)' }}
+                                            />
+                                        ) : (
+                                            <button
+                                                onClick={() => toggleTodo(todo.id)}
+                                                className="text-left w-full"
+                                            >
+                                                <span
+                                                    className={clsx("text-lg transition-all block", todo.completed && "line-through")}
+                                                    style={{
+                                                        color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
+                                                        wordWrap: 'break-word',
+                                                        overflowWrap: 'break-word',
+                                                        wordBreak: 'break-word'
+                                                    }}
+                                                >
+                                                    {todo.text}
+                                                </span>
+                                            </button>
+                                        )}
+
+                                        {isOverdue && !editingTaskId && (
                                             <span className="text-sm mt-1 block" style={{ color: '#ef4444' }}>
                                                 {t('tasks.created')}: {todoDate.toLocaleDateString()}
                                             </span>
                                         )}
                                     </div>
-                                </button>
+                                </div>
 
                                 {!isHistoryView && (
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center gap-1 ml-2">
+                                        {/* Edit button */}
+                                        <button
+                                            onClick={() => startEditing(todo)}
+                                            className="p-2 hover:text-blue-600 transition-colors"
+                                            style={{ color: 'var(--color-text-muted)' }}
+                                            aria-label={t('tasks.edit_label')}
+                                        >
+                                            <Pencil size={20} />
+                                        </button>
+
                                         {/* Reschedule button */}
                                         {reschedulingTask === todo.id ? (
                                             <DatePickerButton
@@ -194,7 +256,7 @@ export default function Todos() {
                                                 <Calendar size={20} />
                                             </button>
                                         )}
-                                        {/* Delete button - always visible for mobile */}
+                                        {/* Delete button */}
                                         <button
                                             onClick={() => deleteTodo(todo.id)}
                                             className="p-2 hover:text-red-600 transition-colors"
@@ -218,10 +280,12 @@ export default function Todos() {
                 selectedDate={selectedDate}
             />
 
-            <IncompleteTasksModal
-                isOpen={showIncompleteTasks}
-                onClose={() => setShowIncompleteTasks(false)}
-            />
+            {showIncompleteTasks && (
+                <IncompleteTasksModal
+                    isOpen={true}
+                    onClose={() => setShowIncompleteTasks(false)}
+                />
+            )}
         </div>
     );
 }

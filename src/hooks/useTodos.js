@@ -143,6 +143,24 @@ export function useTodos(date = null) {
     };
 
 
+    const updateTodoText = async (id, newText) => {
+        if (!user || !newText.trim()) return;
+
+        const trimmedText = newText.trim();
+
+        // Optimistic update
+        setTodos(prev => prev.map(t => t.id === id ? { ...t, text: trimmedText } : t));
+
+        try {
+            const todoRef = doc(db, 'users', user.uid, 'todos', id);
+            await updateDoc(todoRef, {
+                text: trimmedText
+            });
+        } catch (error) {
+            console.error('Error updating todo text:', error);
+        }
+    };
+
     const rescheduleTodo = async (id, newDate) => {
         if (!user) return;
 
@@ -159,5 +177,5 @@ export function useTodos(date = null) {
         }
     };
 
-    return { todos, addTodo, toggleTodo, deleteTodo, rescheduleTodo };
+    return { todos, addTodo, toggleTodo, deleteTodo, updateTodoText, rescheduleTodo };
 }
