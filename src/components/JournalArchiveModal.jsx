@@ -77,19 +77,23 @@ export default function JournalArchiveModal({ isOpen, onClose }) {
 
                                 {!collapsedMonths[monthYear] && (
                                     <div className="space-y-3 pl-4 border-l-2 animate-in slide-in-from-top-2 duration-200" style={{ borderColor: 'var(--color-border)' }}>
-                                        {monthEntries.map(entry => (
-                                            <div
-                                                key={entry.id}
-                                                className="p-3 rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
-                                            >
-                                                <div className="text-xs font-medium mb-1 opacity-70">
-                                                    {new Date(entry.date).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })} • {new Date(entry.date).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                        {monthEntries.map(entry => {
+                                            const displayDate = entry.updatedAt ? new Date(entry.updatedAt) : new Date(entry.date);
+                                            return (
+                                                <div
+                                                    key={entry.id}
+                                                    className="p-3 rounded-lg hover:bg-[var(--color-bg-secondary)] transition-colors"
+                                                >
+                                                    <div className="text-xs font-medium mb-1 opacity-70">
+                                                        {displayDate.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' })} • {displayDate.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                                        {entry.updatedAt && ` ${t('common.edited')}`}
+                                                    </div>
+                                                    <p className="whitespace-pre-wrap text-sm line-clamp-3">
+                                                        {entry.text}
+                                                    </p>
                                                 </div>
-                                                <p className="whitespace-pre-wrap text-sm line-clamp-3">
-                                                    {entry.text}
-                                                </p>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

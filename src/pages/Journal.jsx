@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useJournal } from '../hooks/useJournal';
-import { Send, Trash2, Clock, X, Book } from 'lucide-react';
+import { Send, Trash2, Clock, X, Book, Pencil } from 'lucide-react';
 import HistoryModal from '../components/HistoryModal';
 import JournalArchiveModal from '../components/JournalArchiveModal';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,9 +9,31 @@ export default function Journal() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
     const [showArchive, setShowArchive] = useState(false);
-    const { entries, addEntry, deleteEntry } = useJournal(selectedDate);
+    const { entries, addEntry, deleteEntry, updateEntry } = useJournal(selectedDate);
     const [input, setInput] = useState('');
     const { t } = useLanguage();
+
+    // Editing State
+    const [editingEntryId, setEditingEntryId] = useState(null);
+    const [editText, setEditText] = useState('');
+
+    const startEditing = (entry) => {
+        setEditingEntryId(entry.id);
+        setEditText(entry.text);
+    };
+
+    const cancelEditing = () => {
+        setEditingEntryId(null);
+        setEditText('');
+    };
+
+    const saveEditing = async () => {
+        if (editingEntryId) {
+            await updateEntry(editingEntryId, editText);
+            setEditingEntryId(null);
+            setEditText('');
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -105,29 +127,77 @@ export default function Journal() {
                         >
                             <div className="flex justify-between items-start mb-2">
                                 <span className="text-xs font-medium" style={{ color: 'var(--color-text-tertiary)' }}>
-                                    {new Date(entry.date).toLocaleString()}
+                                    {entry.updatedAt
+                                        ? `${new Date(entry.updatedAt).toLocaleString()} ${t('common.edited')}`
+                                        : new Date(entry.date).toLocaleString()}
                                 </span>
                                 {!isHistoryView && (
-                                    <button
-                                        onClick={() => deleteEntry(entry.id)}
-                                        className="hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
-                                        style={{ color: 'var(--color-text-muted)' }}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => startEditing(entry)}
+                                            className="p-1 hover:text-blue-600 transition-colors"
+                                            style={{ color: 'var(--color-text-muted)' }}
+                                            aria-label={t('common.edit')}
+                                        >
+                                            <Pencil size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => deleteEntry(entry.id)}
+                                            className="p-1 hover:text-red-600 transition-colors"
+                                            style={{ color: 'var(--color-text-muted)' }}
+                                            aria-label={t('common.delete')}
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-                            <p
-                                className="whitespace-pre-wrap"
-                                style={{
-                                    color: 'var(--color-text-primary)',
-                                    wordWrap: 'break-word',
-                                    overflowWrap: 'break-word',
-                                    wordBreak: 'break-word'
-                                }}
-                            >
-                                {entry.text}
-                            </p>
+
+                            {editingEntryId === entry.id ? (
+                                <div className="mt-2">
+                                    <textarea
+                                        value={editText}
+                                        onChange={(e) => setEditText(e.target.value)}
+                                        className="w-full p-2 rounded-lg border bg-transparent focus:outline-none focus:ring-2 min-h-[100px]"
+                                        style={{
+                                            borderColor: 'var(--color-border)',
+                                            color: 'var(--color-text-primary)'
+                                        }}
+                                        autoFocus
+                                    />
+                                    <div className="flex justify-end gap-2 mt-2">
+                                        <button
+                                            onClick={cancelEditing}
+                                            className="px-3 py-1 text-sm rounded-lg border hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                            style={{
+                                                borderColor: 'var(--color-border)',
+                                                color: 'var(--color-text-secondary)'
+                                            }}
+                                        >
+                                            {t('common.cancel')}
+                                        </button>
+                                        <button
+                                            onClick={saveEditing}
+                                            className="px-3 py-1 text-sm rounded-lg text-white transition-colors"
+                                            style={{ backgroundColor: 'var(--color-accent)' }}
+                                        >
+                                            {t('common.save')}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <p
+                                    className="whitespace-pre-wrap"
+                                    style={{
+                                        color: 'var(--color-text-primary)',
+                                        wordWrap: 'break-word',
+                                        overflowWrap: 'break-word',
+                                        wordBreak: 'break-word'
+                                    }}
+                                >
+                                    {entry.text}
+                                </p>
+                            )}
                         </div>
                     ))
                 )}

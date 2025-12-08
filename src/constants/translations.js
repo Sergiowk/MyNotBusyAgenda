@@ -14,6 +14,7 @@ export const translations = {
             undo: "Undo",
             task_deleted: "Task deleted",
             entry_deleted: "Entry deleted",
+            edited: "(Edited)",
         },
         auth: {
             welcome: "Welcome back",
@@ -131,6 +132,7 @@ export const translations = {
             undo: "Deshacer",
             task_deleted: "Tarea eliminada",
             entry_deleted: "Entrada eliminada",
+            edited: "(Editado)",
         },
         auth: {
             welcome: "Bienvenido de nuevo",
@@ -248,6 +250,7 @@ export const translations = {
             undo: "撤销",
             task_deleted: "任务已删除",
             entry_deleted: "条目已删除",
+            edited: "(已编辑)",
         },
         auth: {
             welcome: "欢迎回来",
@@ -364,6 +367,7 @@ export const translations = {
             undo: "Annuler",
             task_deleted: "Tâche supprimée",
             entry_deleted: "Entrée supprimée",
+            edited: "(Modifié)",
         },
         auth: {
             welcome: "Bon retour",
@@ -480,6 +484,7 @@ export const translations = {
             undo: "Rückgängig",
             task_deleted: "Aufgabe gelöscht",
             entry_deleted: "Eintrag gelöscht",
+            edited: "(Bearbeitet)",
         },
         auth: {
             welcome: "Willkommen zurück",

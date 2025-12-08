@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, deleteDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
+import { collection, addDoc, deleteDoc, updateDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
@@ -53,11 +53,15 @@ export function useJournal(date = null, fetchAll = false) {
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const entriesData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                date: doc.data().date?.toDate?.()?.toISOString() || doc.data().date
-            }));
+            const entriesData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    date: data.date?.toDate?.()?.toISOString() || data.date,
+                    updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
+                };
+            });
             setEntries(entriesData);
         });
 
@@ -115,6 +119,19 @@ export function useJournal(date = null, fetchAll = false) {
         }
     };
 
+    const updateEntry = async (id, text) => {
+        if (!text.trim() || !user) return;
 
-    return { entries, addEntry, deleteEntry };
+        try {
+            await updateDoc(doc(db, 'users', user.uid, 'journal', id), {
+                text,
+                updatedAt: new Date(),
+            });
+        } catch (error) {
+            console.error('Error updating journal entry:', error);
+        }
+    };
+
+
+    return { entries, addEntry, deleteEntry, updateEntry };
 }
