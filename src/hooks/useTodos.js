@@ -3,6 +3,7 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, order
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
+import { encryptData, decryptData } from '../utils/encryption';
 
 
 export function useTodos(date = null) {
@@ -37,10 +38,15 @@ export function useTodos(date = null) {
         }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            let todosData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            let todosData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    // Decrypt the text
+                    text: decryptData(data.text, user.uid)
+                };
+            });
 
             // Filter out completed tasks from previous dates and future tasks when not in history view
             if (!date) {
@@ -76,9 +82,10 @@ export function useTodos(date = null) {
         try {
             // Use customDate if provided, otherwise use current date/time
             const createdAt = customDate || new Date();
+            const encryptedText = encryptData(text, user.uid);
 
             await addDoc(collection(db, 'users', user.uid, 'todos'), {
-                text,
+                text: encryptedText,
                 completed: false,
                 category,
                 createdAt,
@@ -118,8 +125,9 @@ export function useTodos(date = null) {
                 // onUndo: restore the todo by adding it back
                 async () => {
                     try {
+                        const encryptedText = encryptData(todo.text, user.uid);
                         await addDoc(collection(db, 'users', user.uid, 'todos'), {
-                            text: todo.text,
+                            text: encryptedText,
                             completed: todo.completed,
                             category: todo.category,
                             createdAt: todo.createdAt,
@@ -148,13 +156,14 @@ export function useTodos(date = null) {
 
         const trimmedText = newText.trim();
 
-        // Optimistic update
+        // Optimistic update (state holds reference to decrypted text)
         setTodos(prev => prev.map(t => t.id === id ? { ...t, text: trimmedText } : t));
 
         try {
+            const encryptedText = encryptData(trimmedText, user.uid);
             const todoRef = doc(db, 'users', user.uid, 'todos', id);
             await updateDoc(todoRef, {
-                text: trimmedText
+                text: encryptedText
             });
         } catch (error) {
             console.error('Error updating todo text:', error);

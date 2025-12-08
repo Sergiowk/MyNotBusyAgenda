@@ -3,6 +3,7 @@ import { collection, addDoc, deleteDoc, updateDoc, doc, query, onSnapshot, order
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
+import { encryptData, decryptData } from '../utils/encryption';
 
 
 export function useJournal(date = null, fetchAll = false) {
@@ -58,6 +59,7 @@ export function useJournal(date = null, fetchAll = false) {
                 return {
                     id: doc.id,
                     ...data,
+                    text: decryptData(data.text, user.uid),
                     date: data.date?.toDate?.()?.toISOString() || data.date,
                     updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
                 };
@@ -72,8 +74,9 @@ export function useJournal(date = null, fetchAll = false) {
         if (!text.trim() || !user) return;
 
         try {
+            const encryptedText = encryptData(text, user.uid);
             await addDoc(collection(db, 'users', user.uid, 'journal'), {
-                text,
+                text: encryptedText,
                 date: new Date(),
             });
         } catch (error) {
@@ -97,9 +100,11 @@ export function useJournal(date = null, fetchAll = false) {
                 // onUndo: restore the entry by adding it back
                 async () => {
                     try {
+                        const encryptedText = encryptData(entry.text, user.uid);
                         await addDoc(collection(db, 'users', user.uid, 'journal'), {
-                            text: entry.text,
+                            text: encryptedText,
                             date: new Date(entry.date),
+                            ...(entry.updatedAt && { updatedAt: new Date(entry.updatedAt) })
                         });
                     } catch (error) {
                         console.error('Error restoring journal entry:', error);
@@ -123,8 +128,9 @@ export function useJournal(date = null, fetchAll = false) {
         if (!text.trim() || !user) return;
 
         try {
+            const encryptedText = encryptData(text, user.uid);
             await updateDoc(doc(db, 'users', user.uid, 'journal', id), {
-                text,
+                text: encryptedText,
                 updatedAt: new Date(),
             });
         } catch (error) {
