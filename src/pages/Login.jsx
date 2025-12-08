@@ -8,10 +8,11 @@ import { useState } from 'react';
 
 
 export default function Login() {
-    const { signInWithGoogle, loginWithEmail } = useAuth();
+    const { signInWithGoogle, loginWithEmail, registerWithEmail } = useAuth();
     const { t } = useLanguage();
     const { isDark, toggleDarkMode } = useDarkMode();
     const [isEmailLogin, setIsEmailLogin] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -26,15 +27,25 @@ export default function Login() {
         }
     };
 
-    const handleEmailSignIn = async (e) => {
+    const handleEmailAuth = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
         try {
-            await loginWithEmail(email, password);
+            if (isRegistering) {
+                await registerWithEmail(email, password);
+            } else {
+                await loginWithEmail(email, password);
+            }
         } catch (error) {
-            console.error('Failed to sign in:', error);
-            setError('Failed to sign in with email/password');
+            console.error('Failed to authenticate:', error);
+            if (error.code === 'auth/email-already-in-use') {
+                setError('Email already in use. Please sign in instead.');
+            } else if (error.code === 'auth/weak-password') {
+                setError('Password should be at least 6 characters.');
+            } else {
+                setError(`Failed to ${isRegistering ? 'sign up' : 'sign in'}`);
+            }
         } finally {
             setLoading(false);
         }
@@ -110,15 +121,29 @@ export default function Login() {
                         </div>
 
                         {!isEmailLogin ? (
-                            <button
-                                onClick={() => setIsEmailLogin(true)}
-                                className="w-full py-3 px-4 rounded-lg font-medium transition-all hover:bg-[var(--color-bg-secondary)] border"
-                                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                            >
-                                Sign in with Email
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => setIsEmailLogin(true)}
+                                    className="w-full py-3 px-4 rounded-lg font-medium transition-all hover:bg-[var(--color-bg-secondary)] border"
+                                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                                >
+                                    Sign in with Email
+                                </button>
+                                <div className="text-center pt-3">
+                                    <button
+                                        onClick={() => {
+                                            setIsEmailLogin(true);
+                                            setIsRegistering(true);
+                                        }}
+                                        className="text-sm underline hover:opacity-80 transition-opacity"
+                                        style={{ color: 'var(--color-text-secondary)' }}
+                                    >
+                                        Need an account? Sign Up
+                                    </button>
+                                </div>
+                            </>
                         ) : (
-                            <form onSubmit={handleEmailSignIn} className="space-y-4 animate-in slide-in-from-top-4 fade-in duration-200">
+                            <form onSubmit={handleEmailAuth} className="space-y-4 animate-in slide-in-from-top-4 fade-in duration-200">
                                 <div>
                                     <input
                                         type="email"
@@ -141,10 +166,15 @@ export default function Login() {
                                         required
                                     />
                                 </div>
+
                                 <div className="flex gap-2">
                                     <button
                                         type="button"
-                                        onClick={() => setIsEmailLogin(false)}
+                                        onClick={() => {
+                                            setIsEmailLogin(false);
+                                            setIsRegistering(false);
+                                            setError('');
+                                        }}
                                         className="flex-1 py-2 px-4 rounded-lg font-medium transition-all hover:bg-[var(--color-bg-secondary)] text-sm"
                                         style={{ color: 'var(--color-text-secondary)' }}
                                     >
@@ -156,7 +186,23 @@ export default function Login() {
                                         className="flex-1 py-2 px-4 rounded-lg font-medium transition-all hover:opacity-90 text-white disabled:opacity-50"
                                         style={{ backgroundColor: 'var(--color-accent)' }}
                                     >
-                                        {loading ? 'Signing in...' : 'Sign In'}
+                                        {loading ? (isRegistering ? 'Signing Up...' : 'Signing In...') : (isRegistering ? 'Sign Up' : 'Sign In')}
+                                    </button>
+                                </div>
+
+                                <div className="text-center pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsRegistering(!isRegistering);
+                                            setError('');
+                                        }}
+                                        className="text-sm underline hover:opacity-80 transition-opacity"
+                                        style={{ color: 'var(--color-text-secondary)' }}
+                                    >
+                                        {isRegistering
+                                            ? "Already have an account? Sign In"
+                                            : "Need an account? Sign Up"}
                                     </button>
                                 </div>
                             </form>
@@ -164,6 +210,6 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

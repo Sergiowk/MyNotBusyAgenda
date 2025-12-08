@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -59,12 +59,22 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const registerWithEmail = async (email, password) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error('Error registering with email:', error);
+            throw error;
+        }
+    };
+
     const value = {
         user,
         loading,
         signInWithGoogle,
         loginWithEmail,
         linkEmailPassword,
+        registerWithEmail,
         logout,
     };
 
