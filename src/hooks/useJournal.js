@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
 
 
-export function useJournal(date = null) {
+export function useJournal(date = null, fetchAll = false) {
     const [entries, setEntries] = useState([]);
     const { user } = useAuth();
     const { scheduleDelete } = useUndo();
@@ -20,7 +20,12 @@ export function useJournal(date = null) {
         const entriesRef = collection(db, 'users', user.uid, 'journal');
         let q;
 
-        if (date) {
+        if (fetchAll) {
+            q = query(
+                entriesRef,
+                orderBy('date', 'desc')
+            );
+        } else if (date) {
             const start = new Date(date);
             start.setHours(0, 0, 0, 0);
             const end = new Date(date);
@@ -57,7 +62,7 @@ export function useJournal(date = null) {
         });
 
         return unsubscribe;
-    }, [user, date]);
+    }, [user, date, fetchAll]);
 
     const addEntry = async (text) => {
         if (!text.trim() || !user) return;

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useJournal } from '../hooks/useJournal';
-import { Send, Trash2, Clock, X } from 'lucide-react';
+import { Send, Trash2, Clock, X, Book } from 'lucide-react';
 import HistoryModal from '../components/HistoryModal';
+import JournalArchiveModal from '../components/JournalArchiveModal';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Journal() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [showHistory, setShowHistory] = useState(false);
+    const [showArchive, setShowArchive] = useState(false);
     const { entries, addEntry, deleteEntry } = useJournal(selectedDate);
     const [input, setInput] = useState('');
     const { t } = useLanguage();
@@ -43,6 +45,16 @@ export default function Journal() {
                             title={t('common.clear_filter')}
                         >
                             <X size={24} />
+                        </button>
+                    )}
+                    {!isHistoryView && (
+                        <button
+                            onClick={() => setShowArchive(true)}
+                            className="p-2 rounded-xl border transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                            style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                            title={t('journal.view_archive')}
+                        >
+                            <Book size={24} />
                         </button>
                     )}
                     <button
@@ -126,6 +138,11 @@ export default function Journal() {
                 onClose={() => setShowHistory(false)}
                 onDateSelect={setSelectedDate}
                 selectedDate={selectedDate}
+            />
+
+            <JournalArchiveModal
+                isOpen={showArchive}
+                onClose={() => setShowArchive(false)}
             />
         </div>
     );
