@@ -1,8 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, BookOpen, Moon, Sun, LogOut, User } from 'lucide-react';
-import { useDarkMode } from '../hooks/useDarkMode';
+import { Home, CheckSquare, BookOpen, LogOut, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import LanguageSelector from './LanguageSelector';
+import { useTheme } from '../contexts/ThemeContext';
 import UndoSnackbar from './UndoSnackbar';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import { useState } from 'react';
@@ -12,9 +11,14 @@ import logo from '../assets/logo.png';
 
 export default function Layout() {
     const location = useLocation();
-    const { isDark, toggleDarkMode } = useDarkMode();
     const { logout } = useAuth();
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    // Needed to force re-render on theme change if it affects layout styles directly not handled by CSS variables
+    // But since we use CSS variables, just consuming the context might be enough or not even needed 
+    // if only children need it. However, we might want to ensure the top div gets the class?
+    // The ThemeProvider handles the class on document.documentElement.
+    // We import useTheme just in case we need to trigger something or access state.
+    useTheme();
 
     const navItems = [
         { path: '/', icon: Home, label: 'Home' },
@@ -31,20 +35,13 @@ export default function Layout() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-200 pb-20 relative">
-            <header className="px-6 py-4 sticky top-0 z-10 backdrop-blur-md bg-[var(--color-bg-primary)]/80 border-b border-[var(--color-border)]">
+        <div className="min-h-screen transition-colors duration-200 pb-20 relative" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+            <header className="px-6 py-4 sticky top-0 z-10 backdrop-blur-md bg-opacity-80 border-b" style={{ backgroundColor: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
                 <div className="content-container flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <img src={logo} alt="MyNotBusyAgenda Logo" className="h-10 w-16" />
                     </div>
                     <div className="flex items-center gap-4">
-                        <LanguageSelector />
-                        <button
-                            onClick={toggleDarkMode}
-                            className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
-                        >
-                            {isDark ? <Sun size={20} /> : <Moon size={20} />}
-                        </button>
                         <button
                             onClick={() => setIsSettingsOpen(true)}
                             className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"

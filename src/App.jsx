@@ -40,17 +40,21 @@ function ProtectedRoutes() {
   );
 }
 
+import { ThemeProvider } from './contexts/ThemeContext';
+
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <UndoProvider>
-          <BrowserRouter>
-            <ProtectedRoutes />
-          </BrowserRouter>
-        </UndoProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <ThemeProvider>
+          <UndoProvider>
+            <BrowserRouter>
+              <ProtectedRoutes />
+            </BrowserRouter>
+          </UndoProvider>
+        </ThemeProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 

@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { X, Lock, Check } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { X, Lock, Check, Moon, Sun } from 'lucide-react';
+import LanguageSelector from './LanguageSelector';
 
 export default function ProfileSettingsModal({ isOpen, onClose }) {
     const { user, linkEmailPassword } = useAuth();
     const { t } = useLanguage();
+    const { isDark, toggleDarkMode } = useTheme();
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState({ type: '', message: '' });
     const [loading, setLoading] = useState(false);
@@ -62,6 +65,45 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 </div>
 
                 <div className="p-6">
+                    {/* Preferences Section */}
+                    <div className="mb-6 pb-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                        <h3 className="text-lg font-medium mb-4" style={{ color: 'var(--color-text-primary)' }}>
+                            {t('profile.preferences') || 'Preferences'}
+                        </h3>
+
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <span style={{ color: 'var(--color-text-primary)' }}>{t('profile.language') || 'Language'}</span>
+                                <LanguageSelector />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <span style={{ color: 'var(--color-text-primary)' }}>{t('profile.theme') || 'Theme'}</span>
+                                <button
+                                    onClick={toggleDarkMode}
+                                    className="p-2 rounded-lg transition-colors flex items-center gap-2 border"
+                                    style={{
+                                        backgroundColor: 'var(--color-bg-secondary)',
+                                        borderColor: 'var(--color-border)',
+                                        color: 'var(--color-text-primary)'
+                                    }}
+                                >
+                                    {isDark ? (
+                                        <>
+                                            <Moon size={18} />
+                                            <span>{t('profile.theme_dark')}</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sun size={18} />
+                                            <span>{t('profile.theme_light')}</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="mb-6">
                         <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
                             {t('profile.email_label')}

@@ -48,6 +48,11 @@ export const translations = {
             error_email_in_use: "This email is already associated with a password.",
             error_generic: "Failed to set password.",
             error_short_password: "Password must be at least 6 characters",
+            preferences: "Preferences",
+            language: "Language",
+            theme: "Theme",
+            theme_dark: "Dark",
+            theme_light: "Light",
         },
         dashboard: {
             greeting: {
@@ -156,6 +161,11 @@ export const translations = {
             error_email_in_use: "Este correo ya está asociado a una contraseña.",
             error_generic: "Fallo al establecer contraseña.",
             error_short_password: "La contraseña debe tener al menos 6 caracteres",
+            preferences: "Preferencias",
+            language: "Idioma",
+            theme: "Tema",
+            theme_dark: "Oscuro",
+            theme_light: "Claro",
         },
         dashboard: {
             greeting: {
@@ -264,6 +274,11 @@ export const translations = {
             error_email_in_use: "该邮箱已关联密码。",
             error_generic: "设置密码失败。",
             error_short_password: "密码长度至少为 6 个字符",
+            preferences: "偏好设置",
+            language: "语言",
+            theme: "主题",
+            theme_dark: "深色",
+            theme_light: "浅色",
         },
         dashboard: {
             greeting: {
@@ -371,6 +386,11 @@ export const translations = {
             error_email_in_use: "Cet email est déjà associé à un mot de passe.",
             error_generic: "Échec de la définition du mot de passe.",
             error_short_password: "Le mot de passe doit contenir au moins 6 caractères",
+            preferences: "Préférences",
+            language: "Langue",
+            theme: "Thème",
+            theme_dark: "Sombre",
+            theme_light: "Clair",
         },
         dashboard: {
             greeting: {
@@ -478,6 +498,11 @@ export const translations = {
             error_email_in_use: "Diese E-Mail ist bereits mit einem Passwort verknüpft.",
             error_generic: "Fehler beim Festlegen des Passworts.",
             error_short_password: "Das Passwort muss mindestens 6 Zeichen lang sein",
+            preferences: "Einstellungen",
+            language: "Sprache",
+            theme: "Thema",
+            theme_dark: "Dunkel",
+            theme_light: "Hell",
         },
         dashboard: {
             greeting: {

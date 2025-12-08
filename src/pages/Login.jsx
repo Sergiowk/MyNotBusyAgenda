@@ -1,6 +1,6 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useDarkMode } from '../hooks/useDarkMode';
+import { useTheme } from '../contexts/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
 import LanguageSelector from '../components/LanguageSelector';
 import logo from '../assets/logo.png';
@@ -10,7 +10,7 @@ import { useState } from 'react';
 export default function Login() {
     const { signInWithGoogle, loginWithEmail, registerWithEmail } = useAuth();
     const { t } = useLanguage();
-    const { isDark, toggleDarkMode } = useDarkMode();
+    const { isDark, toggleDarkMode } = useTheme();
     const [isEmailLogin, setIsEmailLogin] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
     const [email, setEmail] = useState('');
