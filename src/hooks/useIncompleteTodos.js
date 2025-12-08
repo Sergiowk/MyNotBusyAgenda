@@ -3,6 +3,7 @@ import { collection, query, onSnapshot, orderBy, where, updateDoc, deleteDoc, do
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
+import { encryptData, decryptData } from '../utils/encryption';
 
 
 export function useIncompleteTodos() {
@@ -27,10 +28,14 @@ export function useIncompleteTodos() {
         );
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const todosData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const todosData = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    ...data,
+                    text: decryptData(data.text, user.uid)
+                };
+            });
 
             setIncompleteTodos(todosData);
 
@@ -128,8 +133,9 @@ export function useIncompleteTodos() {
                         });
 
                         // Then add back to Firebase
+                        const encryptedText = encryptData(todo.text, user.uid);
                         await addDoc(collection(db, 'users', user.uid, 'todos'), {
-                            text: todo.text,
+                            text: encryptedText,
                             completed: todo.completed,
                             category: todo.category,
                             createdAt: todo.createdAt,
@@ -179,9 +185,10 @@ export function useIncompleteTodos() {
         });
 
         try {
+            const encryptedText = encryptData(trimmedText, user.uid);
             const todoRef = doc(db, 'users', user.uid, 'todos', id);
             await updateDoc(todoRef, {
-                text: trimmedText
+                text: encryptedText
             });
         } catch (error) {
             console.error('Error updating todo text:', error);
