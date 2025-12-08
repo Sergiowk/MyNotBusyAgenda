@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
 
 const AuthContext = createContext();
@@ -39,10 +39,32 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const loginWithEmail = async (email, password) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            console.error('Error signing in with email:', error);
+            throw error;
+        }
+    };
+
+    const linkEmailPassword = async (password) => {
+        try {
+            if (!auth.currentUser) throw new Error("No user logged in");
+            const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+            await linkWithCredential(auth.currentUser, credential);
+        } catch (error) {
+            console.error('Error linking credential:', error);
+            throw error;
+        }
+    };
+
     const value = {
         user,
         loading,
         signInWithGoogle,
+        loginWithEmail,
+        linkEmailPassword,
         logout,
     };
 

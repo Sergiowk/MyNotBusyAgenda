@@ -1,9 +1,11 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
+import { Home, CheckSquare, BookOpen, Moon, Sun, LogOut, User } from 'lucide-react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useAuth } from '../contexts/AuthContext';
 import LanguageSelector from './LanguageSelector';
 import UndoSnackbar from './UndoSnackbar';
+import ProfileSettingsModal from './ProfileSettingsModal';
+import { useState } from 'react';
 import clsx from 'clsx';
 import logo from '../assets/logo.png';
 
@@ -12,6 +14,7 @@ export default function Layout() {
     const location = useLocation();
     const { isDark, toggleDarkMode } = useDarkMode();
     const { logout } = useAuth();
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const navItems = [
         { path: '/', icon: Home, label: 'Home' },
@@ -41,6 +44,13 @@ export default function Layout() {
                             className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
                         >
                             {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
+                        <button
+                            onClick={() => setIsSettingsOpen(true)}
+                            className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                            title="Profile Settings"
+                        >
+                            <User size={20} />
                         </button>
                         <button
                             onClick={handleLogout}
@@ -77,6 +87,11 @@ export default function Layout() {
 
             {/* Undo Snackbar */}
             <UndoSnackbar />
+
+            <ProfileSettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+            />
         </div>
     );
 }
