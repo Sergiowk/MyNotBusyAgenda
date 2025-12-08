@@ -23,7 +23,7 @@ export default function Login() {
             await signInWithGoogle();
         } catch (error) {
             console.error('Failed to sign in:', error);
-            setError('Failed to sign in with Google');
+            setError(t('auth.google_failed'));
         }
     };
 
@@ -40,11 +40,11 @@ export default function Login() {
         } catch (error) {
             console.error('Failed to authenticate:', error);
             if (error.code === 'auth/email-already-in-use') {
-                setError('Email already in use. Please sign in instead.');
+                setError(t('auth.email_in_use'));
             } else if (error.code === 'auth/weak-password') {
-                setError('Password should be at least 6 characters.');
+                setError(t('auth.weak_password'));
             } else {
-                setError(`Failed to ${isRegistering ? 'sign up' : 'sign in'}`);
+                setError(t('auth.auth_failed'));
             }
         } finally {
             setLoading(false);
@@ -116,7 +116,7 @@ export default function Login() {
 
                         <div className="relative flex py-2 items-center">
                             <div className="flex-grow border-t" style={{ borderColor: 'var(--color-border)' }}></div>
-                            <span className="flex-shrink-0 mx-4 text-sm" style={{ color: 'var(--color-text-secondary)' }}>Or</span>
+                            <span className="flex-shrink-0 mx-4 text-sm" style={{ color: 'var(--color-text-secondary)' }}>{t('auth.or')}</span>
                             <div className="flex-grow border-t" style={{ borderColor: 'var(--color-border)' }}></div>
                         </div>
 
@@ -127,7 +127,7 @@ export default function Login() {
                                     className="w-full py-3 px-4 rounded-lg font-medium transition-all hover:bg-[var(--color-bg-secondary)] border"
                                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                                 >
-                                    Sign in with Email
+                                    {t('auth.email_login')}
                                 </button>
                                 <div className="text-center pt-3">
                                     <button
@@ -138,7 +138,7 @@ export default function Login() {
                                         className="text-sm underline hover:opacity-80 transition-opacity"
                                         style={{ color: 'var(--color-text-secondary)' }}
                                     >
-                                        Need an account? Sign Up
+                                        {t('auth.need_account')}
                                     </button>
                                 </div>
                             </>
@@ -149,7 +149,7 @@ export default function Login() {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="Email address"
+                                        placeholder={t('auth.email_placeholder')}
                                         className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
                                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                                         required
@@ -160,7 +160,7 @@ export default function Login() {
                                         type="password"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="Password"
+                                        placeholder={t('auth.password_placeholder')}
                                         className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
                                         style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                                         required
@@ -178,7 +178,7 @@ export default function Login() {
                                         className="flex-1 py-2 px-4 rounded-lg font-medium transition-all hover:bg-[var(--color-bg-secondary)] text-sm"
                                         style={{ color: 'var(--color-text-secondary)' }}
                                     >
-                                        Cancel
+                                        {t('auth.cancel')}
                                     </button>
                                     <button
                                         type="submit"
@@ -186,7 +186,7 @@ export default function Login() {
                                         className="flex-1 py-2 px-4 rounded-lg font-medium transition-all hover:opacity-90 text-white disabled:opacity-50"
                                         style={{ backgroundColor: 'var(--color-accent)' }}
                                     >
-                                        {loading ? (isRegistering ? 'Signing Up...' : 'Signing In...') : (isRegistering ? 'Sign Up' : 'Sign In')}
+                                        {loading ? (isRegistering ? t('auth.signing_up') : t('auth.signing_in')) : (isRegistering ? t('auth.sign_up') : t('auth.sign_in'))}
                                     </button>
                                 </div>
 
@@ -201,8 +201,8 @@ export default function Login() {
                                         style={{ color: 'var(--color-text-secondary)' }}
                                     >
                                         {isRegistering
-                                            ? "Already have an account? Sign In"
-                                            : "Need an account? Sign Up"}
+                                            ? t('auth.already_have_account')
+                                            : t('auth.need_account')}
                                     </button>
                                 </div>
                             </form>
@@ -210,6 +210,6 @@ export default function Login() {
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

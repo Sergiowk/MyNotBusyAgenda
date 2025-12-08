@@ -18,23 +18,23 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
         setStatus({ type: '', message: '' });
 
         if (password.length < 6) {
-            setStatus({ type: 'error', message: 'Password must be at least 6 characters' });
+            setStatus({ type: 'error', message: t('profile.error_short_password') });
             setLoading(false);
             return;
         }
 
         try {
             await linkEmailPassword(password);
-            setStatus({ type: 'success', message: 'Password set successfully! You can now log in with email.' });
+            setStatus({ type: 'success', message: t('profile.success') });
             setPassword('');
         } catch (error) {
             console.error(error);
             if (error.code === 'auth/requires-recent-login') {
-                setStatus({ type: 'error', message: 'For security, please log out and log in again to set a password.' });
+                setStatus({ type: 'error', message: t('profile.error_recent_login') });
             } else if (error.code === 'auth/email-already-in-use' || error.message.includes("credential-already-in-use")) {
-                setStatus({ type: 'error', message: 'This email is already associated with a password.' });
+                setStatus({ type: 'error', message: t('profile.error_email_in_use') });
             } else {
-                setStatus({ type: 'error', message: 'Failed to set password. ' + error.message });
+                setStatus({ type: 'error', message: t('profile.error_generic') + ' ' + error.message });
             }
         } finally {
             setLoading(false);
@@ -52,7 +52,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 }}
             >
                 <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
-                    <h2 className="text-xl font-semibold">Profile Settings</h2>
+                    <h2 className="text-xl font-semibold">{t('profile.title')}</h2>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
@@ -64,7 +64,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                 <div className="p-6">
                     <div className="mb-6">
                         <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-                            Email
+                            {t('profile.email_label')}
                         </label>
                         <div className="p-3 rounded-lg bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)]">
                             {user?.email}
@@ -74,7 +74,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-                                Set Password for Alternative Login
+                                {t('profile.set_password_label')}
                             </label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" size={18} />
@@ -82,7 +82,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter new password"
+                                    placeholder={t('profile.new_password_placeholder')}
                                     className="w-full pl-10 pr-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
                                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                                 />
@@ -101,10 +101,10 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                             className="w-full py-2 px-4 rounded-lg font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ backgroundColor: 'var(--color-accent)', color: '#ffffff' }}
                         >
-                            {loading ? 'Saving...' : (
+                            {loading ? t('profile.saving') : (
                                 <>
                                     <Check size={18} />
-                                    Set Password
+                                    {t('profile.save_password')}
                                 </>
                             )}
                         </button>
