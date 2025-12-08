@@ -39,7 +39,9 @@ export default function Layout() {
             <header className="px-6 py-4 sticky top-0 z-10 backdrop-blur-md bg-opacity-80 border-b" style={{ backgroundColor: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
                 <div className="content-container flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <img src={logo} alt="MyNotBusyAgenda Logo" className="h-10 w-16" />
+                        <Link to="/" className="hover:opacity-80 transition-opacity">
+                            <img src={logo} alt="MyNotBusyAgenda Logo" className="h-10 w-16" />
+                        </Link>
                     </div>
                     <div className="flex items-center gap-4">
                         <button
