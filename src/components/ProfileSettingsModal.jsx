@@ -151,6 +151,10 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                             )}
                         </button>
                     </form>
+                    {/* Version Display */}
+                    <div className="mt-8 pt-6 border-t text-center text-xs" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-tertiary)' }}>
+                        <p>{t('profile.version')} {__COMMIT_HASH__}</p>
+                    </div>
                 </div>
             </div>
         </div>

@@ -54,6 +54,7 @@ export const translations = {
             theme: "Theme",
             theme_dark: "Dark",
             theme_light: "Light",
+            version: "Version",
         },
         dashboard: {
             greeting: {
@@ -172,6 +173,7 @@ export const translations = {
             theme: "Tema",
             theme_dark: "Oscuro",
             theme_light: "Claro",
+            version: "Versión",
         },
         dashboard: {
             greeting: {
@@ -290,6 +292,7 @@ export const translations = {
             theme: "主题",
             theme_dark: "深色",
             theme_light: "浅色",
+            version: "版本",
         },
         dashboard: {
             greeting: {
@@ -407,6 +410,7 @@ export const translations = {
             theme: "Thème",
             theme_dark: "Sombre",
             theme_light: "Clair",
+            version: "Version",
         },
         dashboard: {
             greeting: {
@@ -524,6 +528,7 @@ export const translations = {
             theme: "Thema",
             theme_dark: "Dunkel",
             theme_light: "Hell",
+            version: "Version",
         },
         dashboard: {
             greeting: {
