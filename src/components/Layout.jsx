@@ -7,6 +7,7 @@ import ProfileSettingsModal from './ProfileSettingsModal';
 import { useState } from 'react';
 import clsx from 'clsx';
 import logo from '../assets/logo.png';
+import InstallPWAButton from './InstallPWAButton';
 
 
 export default function Layout() {
@@ -44,6 +45,7 @@ export default function Layout() {
                         </Link>
                     </div>
                     <div className="flex items-center gap-4">
+                        <InstallPWAButton />
                         <button
                             onClick={() => setIsSettingsOpen(true)}
                             className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
