@@ -210,6 +210,11 @@ export default function Login() {
                     </div>
                 </div>
             </div>
+
+            {/* Version Display */}
+            <div className="absolute bottom-4 text-center text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                <p>{t('profile.version')} {__COMMIT_HASH__}</p>
+            </div>
         </div>
     );
 }
