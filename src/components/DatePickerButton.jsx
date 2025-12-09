@@ -168,17 +168,9 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
                                     onClick={() => handleDateSelect(day)}
                                     className="aspect-square rounded-lg text-sm transition-all hover:bg-black/10 dark:hover:bg-white/10"
                                     style={{
-                                        backgroundColor: isSelected
-                                            ? 'var(--color-accent)'
-                                            : isTodayDate
-                                                ? 'var(--color-accent-light)'
-                                                : 'transparent',
-                                        color: isSelected
-                                            ? 'white'
-                                            : isTodayDate
-                                                ? 'var(--color-accent)'
-                                                : 'var(--color-text-primary)',
-                                        fontWeight: isTodayDate || isSelected ? '600' : '400'
+                                        backgroundColor: (isSelected || isTodayDate) ? 'var(--color-accent)' : 'transparent',
+                                        color: (isSelected || isTodayDate) ? 'white' : 'var(--color-text-primary)',
+                                        fontWeight: (isSelected || isTodayDate) ? '600' : '400'
                                     }}
                                 >
                                     {day}

@@ -202,6 +202,6 @@ export default function Calendar({ onDateSelect, selectedDate }) {
                     );
                 })}
             </div>
-        </div>
+        </div >
     );
 }
