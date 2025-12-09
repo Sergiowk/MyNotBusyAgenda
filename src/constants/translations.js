@@ -94,6 +94,7 @@ export const translations = {
             view_incomplete: "View Incomplete Tasks",
             incomplete_title: "Incomplete Tasks",
             no_incomplete: "All tasks completed! Great job!",
+            completed_section: "Completed",
         },
         journal: {
             title: "Journal",
@@ -213,6 +214,7 @@ export const translations = {
             view_incomplete: "Ver Tareas Incompletas",
             incomplete_title: "Tareas Incompletas",
             no_incomplete: "¡Todas las tareas completadas! ¡Buen trabajo!",
+            completed_section: "Completadas",
         },
         journal: {
             title: "Diario",
@@ -331,6 +333,7 @@ export const translations = {
             view_incomplete: "查看未完成任务",
             incomplete_title: "未完成任务",
             no_incomplete: "所有任务已完成！干得好！",
+            completed_section: "已完成",
         },
         journal: {
             title: "日记",
@@ -449,6 +452,7 @@ export const translations = {
             view_incomplete: "Voir les Tâches Incomplètes",
             incomplete_title: "Tâches Incomplètes",
             no_incomplete: "Toutes les tâches terminées ! Bon travail !",
+            completed_section: "Terminées",
         },
         journal: {
             title: "Journal",
@@ -567,6 +571,7 @@ export const translations = {
             view_incomplete: "Unvollständige Aufgaben anzeigen",
             incomplete_title: "Unvollständige Aufgaben",
             no_incomplete: "Alle Aufgaben erledigt! Tolle Arbeit!",
+            completed_section: "Erledigt",
         },
         journal: {
             title: "Journal",
