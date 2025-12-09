@@ -48,7 +48,7 @@ function App() {
       <LanguageProvider>
         <ThemeProvider>
           <UndoProvider>
-            <BrowserRouter>
+            <BrowserRouter basename={import.meta.env.BASE_URL}>
               <ProtectedRoutes />
             </BrowserRouter>
           </UndoProvider>
