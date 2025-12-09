@@ -87,17 +87,21 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <Link to="/todos" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
-                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.tasks_card.title')}</h3>
-                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{pendingTodos} {t('dashboard.tasks_card.pending')}</p>
+                <Link to="/todos" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
+                    <div>
+                        <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.tasks_card.title')}</h3>
+                        <p className="text-xl sm:text-2xl font-bold break-words" style={{ color: 'var(--color-text-primary)' }}>{pendingTodos} {t('dashboard.tasks_card.pending')}</p>
+                    </div>
                     <div className="mt-4 flex items-center text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
                         {t('dashboard.tasks_card.action')} <ArrowRight size={16} className="ml-1" />
                     </div>
                 </Link>
 
-                <Link to="/journal" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
-                    <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.journal_card.title')}</h3>
-                    <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{t('dashboard.journal_card.subtitle')}</p>
+                <Link to="/journal" className="p-5 rounded-2xl border shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-full" style={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)' }}>
+                    <div>
+                        <h3 className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>{t('dashboard.journal_card.title')}</h3>
+                        <p className="text-xl sm:text-2xl font-bold break-words" style={{ color: 'var(--color-text-primary)' }}>{t('dashboard.journal_card.subtitle')}</p>
+                    </div>
                     <div className="mt-4 flex items-center text-sm font-medium" style={{ color: 'var(--color-accent)' }}>
                         {t('dashboard.journal_card.action')} <ArrowRight size={16} className="ml-1" />
                     </div>
