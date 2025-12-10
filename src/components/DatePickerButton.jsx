@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export default function DatePickerButton({ selectedDate, onDateChange, autoOpen = false }) {
+export default function DatePickerButton({ selectedDate, onDateChange, autoOpen = false, onClose }) {
     const [isOpen, setIsOpen] = useState(autoOpen);
     const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
     const [position, setPosition] = useState({ top: 0, right: 0 });
@@ -16,6 +16,7 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
             if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
                 buttonRef.current && !buttonRef.current.contains(event.target)) {
                 setIsOpen(false);
+                if (onClose) onClose();
             }
         }
 
@@ -84,7 +85,12 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
             <button
                 ref={buttonRef}
                 type="button"
-                onClick={() => setIsOpen(!isOpen)}
+                onClick={() => {
+                    if (isOpen && onClose) {
+                        onClose();
+                    }
+                    setIsOpen(!isOpen);
+                }}
                 className="flex items-center gap-1.5 p-2 rounded-md transition-all hover:bg-black/5 dark:hover:bg-white/5"
                 style={{
                     color: selectedDate ? 'var(--color-accent)' : 'var(--color-text-secondary)',

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
 import IncompleteTasksModal from '../components/IncompleteTasksModal';
@@ -12,6 +12,35 @@ import { CSS } from '@dnd-kit/utilities';
 
 // Helper component for rendering task item
 const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, setEditText, saveEdit, handleEditKeyDown, isOverdue, t, isHistoryView, deleteTodo, rescheduleTodo, reschedulingTask, setReschedulingTask }) => {
+    const isEditing = editingTaskId === todo.id;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+    const textareaRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        }
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isMenuOpen]);
+
+    // Auto-resize textarea for editing
+    useEffect(() => {
+        if (isEditing && textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+            // Focus and move cursor to end
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+        }
+    }, [isEditing, editText]);
+
     return (
         <div
             className={clsx(
@@ -22,8 +51,6 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
             style={{
                 backgroundColor: 'var(--color-bg-card)',
                 borderColor: 'var(--color-border)',
-                // If it's draggable, we might want to disable default touch actions? 
-                // But this one is shared for completed too.
                 touchAction: 'none'
             }}
         >
@@ -43,15 +70,21 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    {editingTaskId === todo.id ? (
-                        <input
-                            type="text"
+                    {isEditing ? (
+                        <textarea
+                            ref={textareaRef}
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             onBlur={saveEdit}
-                            onKeyDown={handleEditKeyDown}
-                            autoFocus
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEdit();
+                                }
+                                handleEditKeyDown(e);
+                            }}
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5 resize-none overflow-hidden"
+                            rows={1}
                             style={{ color: 'var(--color-text-primary)' }}
                         />
                     ) : (
@@ -75,25 +108,14 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
 
                     {isOverdue && !editingTaskId && (
                         <span className="text-sm mt-1 block" style={{ color: '#ef4444' }}>
-                            {t('tasks.created')}: {isOverdue.toLocaleDateString()} {/* Expecting date object here if passed */}
+                            {t('tasks.created')}: {isOverdue.toLocaleDateString()}
                         </span>
                     )}
                 </div>
             </div>
 
             {!isHistoryView && (
-                <div className="flex items-center gap-1 ml-2" onPointerDown={(e) => e.stopPropagation()}>
-                    {/* Edit button */}
-                    <button
-                        onClick={() => startEditing(todo)}
-                        className="p-2 hover:text-blue-600 transition-colors"
-                        style={{ color: 'var(--color-text-muted)' }}
-                        aria-label={t('tasks.edit_label')}
-                    >
-                        <Pencil size={20} />
-                    </button>
-
-                    {/* Reschedule button */}
+                <div className="flex items-center gap-1 ml-2 relative" onPointerDown={(e) => e.stopPropagation()}>
                     {reschedulingTask === todo.id ? (
                         <DatePickerButton
                             selectedDate={null}
@@ -103,27 +125,64 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                                 }
                                 setReschedulingTask(null);
                             }}
+                            onClose={() => setReschedulingTask(null)}
                             autoOpen={true}
                         />
                     ) : (
-                        <button
-                            onClick={() => setReschedulingTask(todo.id)}
-                            className="p-2 hover:text-blue-600 transition-colors"
-                            style={{ color: 'var(--color-text-muted)' }}
-                            aria-label="Reschedule task"
-                        >
-                            <Calendar size={20} />
-                        </button>
+                        <div ref={menuRef} className="relative">
+                            <button
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors"
+                                style={{ color: 'var(--color-text-muted)' }}
+                                aria-label="More options"
+                            >
+                                <MoreVertical size={20} />
+                            </button>
+
+                            {isMenuOpen && (
+                                <div
+                                    className="absolute right-0 top-full mt-1 w-32 rounded-xl shadow-lg border overflow-hidden z-10"
+                                    style={{
+                                        backgroundColor: 'var(--color-bg-card)',
+                                        borderColor: 'var(--color-border)',
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            startEditing(todo);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        style={{ color: 'var(--color-text-primary)' }}
+                                    >
+                                        <Pencil size={14} />
+                                        {t('tasks.edit_label')}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setReschedulingTask(todo.id);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        style={{ color: 'var(--color-text-primary)' }}
+                                    >
+                                        <Calendar size={14} />
+                                        {t('common.reschedule') || 'Reschedule'}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            deleteTodo(todo.id);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
+                                    >
+                                        <Trash2 size={14} />
+                                        {t('tasks.delete_label')}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
-                    {/* Delete button */}
-                    <button
-                        onClick={() => deleteTodo(todo.id)}
-                        className="p-2 hover:text-red-600 transition-colors"
-                        style={{ color: 'var(--color-text-muted)' }}
-                        aria-label={t('tasks.delete_label')}
-                    >
-                        <Trash2 size={20} />
-                    </button>
                 </div>
             )}
         </div>

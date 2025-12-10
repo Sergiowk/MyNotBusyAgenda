@@ -15,6 +15,7 @@ export const translations = {
             task_deleted: "Task deleted",
             entry_deleted: "Entry deleted",
             edited: "(Edited)",
+            reschedule: "Reschedule",
         },
         auth: {
             welcome: "Welcome back",
@@ -135,6 +136,7 @@ export const translations = {
             task_deleted: "Tarea eliminada",
             entry_deleted: "Entrada eliminada",
             edited: "(Editado)",
+            reschedule: "Reprogramar",
         },
         auth: {
             welcome: "Bienvenido de nuevo",
@@ -255,6 +257,7 @@ export const translations = {
             task_deleted: "任务已删除",
             entry_deleted: "条目已删除",
             edited: "(已编辑)",
+            reschedule: "重新安排",
         },
         auth: {
             welcome: "欢迎回来",
@@ -374,6 +377,7 @@ export const translations = {
             task_deleted: "Tâche supprimée",
             entry_deleted: "Entrée supprimée",
             edited: "(Modifié)",
+            reschedule: "Reprogrammer",
         },
         auth: {
             welcome: "Bon retour",
@@ -493,6 +497,7 @@ export const translations = {
             task_deleted: "Aufgabe gelöscht",
             entry_deleted: "Eintrag gelöscht",
             edited: "(Bearbeitet)",
+            reschedule: "Verschieben",
         },
         auth: {
             welcome: "Willkommen zurück",
