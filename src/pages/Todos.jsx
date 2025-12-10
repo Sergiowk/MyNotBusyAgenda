@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useTodos } from '../hooks/useTodos';
 import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil } from 'lucide-react';
 import clsx from 'clsx';
@@ -164,6 +164,22 @@ export default function Todos() {
     const [input, setInput] = useState('');
     const [reschedulingTask, setReschedulingTask] = useState(null); // Track which task is being rescheduled
     const { t } = useLanguage();
+    const textareaRef = useRef(null);
+
+    // Auto-resize textarea
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+    }, [input]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit(e);
+        }
+    };
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -316,19 +332,21 @@ export default function Todos() {
 
             {!isHistoryView && (
                 <form onSubmit={handleSubmit} className="relative">
-                    <input
-                        type="text"
+                    <textarea
+                        ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder={t('tasks.placeholder')}
-                        className="w-full p-4 pr-32 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
+                        className="w-full p-4 pr-32 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all resize-none overflow-hidden min-h-[3.5rem]"
+                        rows={1}
                         style={{
                             backgroundColor: 'var(--color-bg-card)',
                             borderColor: 'var(--color-border)',
                             color: 'var(--color-text-primary)'
                         }}
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <div className="absolute right-2 bottom-3 flex items-center gap-1">
                         <DatePickerButton
                             selectedDate={taskDate}
                             onDateChange={setTaskDate}
