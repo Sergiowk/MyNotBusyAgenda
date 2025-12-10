@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MyNotBusyAgenda</string>
+    <string name="title_activity_main">MyNotBusyAgenda</string>
+    <string name="package_name">com.mynotbusyagenda.app</string>
+    <string name="custom_url_scheme">com.mynotbusyagenda.app</string>
+</resources>
