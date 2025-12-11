@@ -11,8 +11,38 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
     const dropdownRef = useRef(null);
     const { t } = useLanguage();
 
+    // Check for mobile view
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Lock scroll on mobile when open
+    useEffect(() => {
+        if (isMobile && isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobile, isOpen]);
+
     useEffect(() => {
         function handleClickOutside(event) {
+            // On mobile, the backdrop covers everything, so clicking it (outside the modal content) should close.
+            // On desktop, we check if click is outside ref.
+            if (isMobile) {
+                // For mobile, the click outside check is handled by the backdrop onClick
+                return;
+            }
+
             if (dropdownRef.current && !dropdownRef.current.contains(event.target) &&
                 buttonRef.current && !buttonRef.current.contains(event.target)) {
                 setIsOpen(false);
@@ -24,19 +54,43 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
             document.addEventListener('mousedown', handleClickOutside);
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }
-    }, [isOpen]);
+    }, [isOpen, isMobile, onClose]);
 
     useEffect(() => {
-        if (isOpen && buttonRef.current) {
+        if (isOpen && buttonRef.current && !isMobile) {
             const rect = buttonRef.current.getBoundingClientRect();
+            const calendarHeight = 320; // Approx height
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const spaceAbove = rect.top;
+
+            // Default to bottom, flip to top if not enough space below AND more space above
+            let top = rect.bottom + window.scrollY + 8;
+            if (spaceBelow < calendarHeight && spaceAbove > spaceBelow) {
+                top = rect.top + window.scrollY - calendarHeight - 8;
+            }
+
+            // Ensure it doesn't go off screen horizontally
+            let left = rect.left + window.scrollX;
+            let right = 'auto';
+
+            // If it would go off the right edge, align to right
+            if (rect.left + 280 > window.innerWidth) {
+                left = 'auto';
+                right = window.innerWidth - rect.right + window.scrollX;
+            }
+
+            // Simple positioning object update
             setPosition({
-                top: rect.bottom + window.scrollY + 8,
-                right: window.innerWidth - rect.right + window.scrollX
+                top,
+                left,
+                right
             });
+        } else if (isMobile) {
+            setPosition({}); // Just set non-null to trigger return
         } else {
             setPosition(null);
         }
-    }, [isOpen]);
+    }, [isOpen, isMobile]);
 
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
@@ -79,6 +133,11 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
         setIsOpen(false);
     };
 
+    const handleClose = () => {
+        setIsOpen(false);
+        if (onClose) onClose();
+    }
+
     const { daysInMonth, startingDayOfWeek } = getDaysInMonth(currentMonth);
     const monthName = currentMonth.toLocaleDateString('default', { month: 'long', year: 'numeric' });
 
@@ -110,83 +169,178 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
             </button>
 
             {isOpen && position && createPortal(
-                <div
-                    ref={dropdownRef}
-                    className="fixed p-4 rounded-xl border shadow-xl"
-                    style={{
-                        backgroundColor: 'var(--color-bg-card)',
-                        borderColor: 'var(--color-border)',
-                        minWidth: '280px',
-                        top: `${position.top}px`,
-                        right: `${position.right}px`,
-                        zIndex: 99999
-                    }}
-                >
-                    {/* Month Navigation */}
-                    <div className="flex items-center justify-between mb-4">
-                        <button
-                            type="button"
-                            onClick={handlePrevMonth}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                            style={{ color: 'var(--color-text-primary)' }}
+                isMobile ? (
+                    // Mobile Modal Layout
+                    <div
+                        className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                        onClick={handleClose}
+                    >
+                        <div
+                            ref={dropdownRef}
+                            onClick={(e) => e.stopPropagation()}
+                            className="w-full max-w-sm p-4 rounded-2xl shadow-2xl border animate-in fade-in zoom-in-95 duration-200"
+                            style={{
+                                backgroundColor: 'var(--color-bg-card)',
+                                borderColor: 'var(--color-border)',
+                            }}
                         >
-                            ←
-                        </button>
-                        <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                            {monthName}
-                        </span>
-                        <button
-                            type="button"
-                            onClick={handleNextMonth}
-                            className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-                            style={{ color: 'var(--color-text-primary)' }}
-                        >
-                            →
-                        </button>
-                    </div>
-
-                    {/* Day Headers */}
-                    <div className="grid grid-cols-7 gap-1 mb-2">
-                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                            <div
-                                key={i}
-                                className="text-center text-xs font-semibold py-1"
-                                style={{ color: 'var(--color-text-muted)' }}
-                            >
-                                {day}
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Calendar Days */}
-                    <div className="grid grid-cols-7 gap-1">
-                        {Array.from({ length: startingDayOfWeek }).map((_, i) => (
-                            <div key={`empty-${i}`} />
-                        ))}
-                        {Array.from({ length: daysInMonth }).map((_, i) => {
-                            const day = i + 1;
-                            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-                            const isSelected = isSameDay(date, selectedDate);
-                            const isTodayDate = isToday(date);
-
-                            return (
+                            <div className="flex items-center justify-between mb-4">
                                 <button
-                                    key={day}
                                     type="button"
-                                    onClick={() => handleDateSelect(day)}
-                                    className="aspect-square rounded-lg text-sm transition-all hover:bg-black/10 dark:hover:bg-white/10"
-                                    style={{
-                                        backgroundColor: (isSelected || isTodayDate) ? 'var(--color-accent)' : 'transparent',
-                                        color: (isSelected || isTodayDate) ? 'white' : 'var(--color-text-primary)',
-                                        fontWeight: (isSelected || isTodayDate) ? '600' : '400'
-                                    }}
+                                    onClick={handlePrevMonth}
+                                    className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                    style={{ color: 'var(--color-text-primary)' }}
+                                >
+                                    ←
+                                </button>
+                                <span className="font-semibold text-lg" style={{ color: 'var(--color-text-primary)' }}>
+                                    {monthName}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={handleNextMonth}
+                                    className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                    style={{ color: 'var(--color-text-primary)' }}
+                                >
+                                    →
+                                </button>
+                            </div>
+
+                            {/* Day Headers */}
+                            <div className="grid grid-cols-7 gap-1 mb-2">
+                                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                                    <div
+                                        key={i}
+                                        className="text-center text-xs font-semibold py-1"
+                                        style={{ color: 'var(--color-text-muted)' }}
+                                    >
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Calendar Days */}
+                            <div className="grid grid-cols-7 gap-1">
+                                {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+                                    <div key={`empty-${i}`} />
+                                ))}
+                                {Array.from({ length: daysInMonth }).map((_, i) => {
+                                    const day = i + 1;
+                                    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                                    const isSelected = isSameDay(date, selectedDate);
+                                    const isTodayDate = isToday(date);
+
+                                    return (
+                                        <button
+                                            key={day}
+                                            type="button"
+                                            onClick={() => handleDateSelect(day)}
+                                            className="aspect-square rounded-lg text-sm transition-all hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center"
+                                            style={{
+                                                backgroundColor: (isSelected || isTodayDate) ? 'var(--color-accent)' : 'transparent',
+                                                color: (isSelected || isTodayDate) ? 'white' : 'var(--color-text-primary)',
+                                                fontWeight: (isSelected || isTodayDate) ? '600' : '400'
+                                            }}
+                                        >
+                                            {day}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                onClick={handleClose}
+                                className="w-full mt-4 p-3 rounded-xl border font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{
+                                    borderColor: 'var(--color-border)',
+                                    color: 'var(--color-text-primary)'
+                                }}
+                            >
+                                {t ? t('common.close') : 'Close'}
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    // Desktop Popover Layout (Existing but positioned dynamically)
+                    <div
+                        ref={dropdownRef}
+                        className="fixed p-4 rounded-xl border shadow-xl animate-in fade-in zoom-in-95 duration-200"
+                        style={{
+                            backgroundColor: 'var(--color-bg-card)',
+                            borderColor: 'var(--color-border)',
+                            minWidth: '280px',
+                            top: `${position.top}px`,
+                            left: position.left !== 'auto' ? `${position.left}px` : undefined,
+                            right: position.right !== 'auto' ? `${position.right}px` : undefined,
+                            zIndex: 99999
+                        }}
+                    >
+                        {/* Month Navigation */}
+                        <div className="flex items-center justify-between mb-4">
+                            <button
+                                type="button"
+                                onClick={handlePrevMonth}
+                                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                ←
+                            </button>
+                            <span className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                                {monthName}
+                            </span>
+                            <button
+                                type="button"
+                                onClick={handleNextMonth}
+                                className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                →
+                            </button>
+                        </div>
+
+                        {/* Day Headers */}
+                        <div className="grid grid-cols-7 gap-1 mb-2">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
+                                <div
+                                    key={i}
+                                    className="text-center text-xs font-semibold py-1"
+                                    style={{ color: 'var(--color-text-muted)' }}
                                 >
                                     {day}
-                                </button>
-                            );
-                        })}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Calendar Days */}
+                        <div className="grid grid-cols-7 gap-1">
+                            {Array.from({ length: startingDayOfWeek }).map((_, i) => (
+                                <div key={`empty-${i}`} />
+                            ))}
+                            {Array.from({ length: daysInMonth }).map((_, i) => {
+                                const day = i + 1;
+                                const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+                                const isSelected = isSameDay(date, selectedDate);
+                                const isTodayDate = isToday(date);
+
+                                return (
+                                    <button
+                                        key={day}
+                                        type="button"
+                                        onClick={() => handleDateSelect(day)}
+                                        className="aspect-square rounded-lg text-sm transition-all hover:bg-black/10 dark:hover:bg-white/10"
+                                        style={{
+                                            backgroundColor: (isSelected || isTodayDate) ? 'var(--color-accent)' : 'transparent',
+                                            color: (isSelected || isTodayDate) ? 'white' : 'var(--color-text-primary)',
+                                            fontWeight: (isSelected || isTodayDate) ? '600' : '400'
+                                        }}
+                                    >
+                                        {day}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>,
+                ),
                 document.body
             )}
         </>

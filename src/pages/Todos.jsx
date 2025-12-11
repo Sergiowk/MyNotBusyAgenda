@@ -41,6 +41,22 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
         }
     }, [isEditing, editText]);
 
+    // Helper for menu positioning
+    const [menuPosition, setMenuPosition] = useState('bottom'); // 'bottom' or 'top'
+
+    const toggleMenu = () => {
+        if (!isMenuOpen) {
+            // Check space below before opening
+            if (menuRef.current) {
+                const rect = menuRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                // If less than 150px below, open upwards
+                setMenuPosition(spaceBelow < 150 ? 'top' : 'bottom');
+            }
+        }
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     return (
         <div
             className={clsx(
@@ -131,7 +147,7 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                     ) : (
                         <div ref={menuRef} className="relative">
                             <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                onClick={toggleMenu}
                                 className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors"
                                 style={{ color: 'var(--color-text-muted)' }}
                                 aria-label="More options"
@@ -141,7 +157,10 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
 
                             {isMenuOpen && (
                                 <div
-                                    className="absolute right-0 top-full mt-1 w-32 rounded-xl shadow-lg border overflow-hidden z-10"
+                                    className={clsx(
+                                        "absolute right-0 w-40 rounded-xl shadow-lg border overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-100",
+                                        menuPosition === 'top' ? "bottom-full mb-2" : "top-full mt-1"
+                                    )}
                                     style={{
                                         backgroundColor: 'var(--color-bg-card)',
                                         borderColor: 'var(--color-border)',
