@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { useTodos } from '../hooks/useTodos';
 import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
@@ -11,7 +11,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { CSS } from '@dnd-kit/utilities';
 
 // Helper component for rendering task item
-const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, setEditText, saveEdit, handleEditKeyDown, isOverdue, t, isHistoryView, deleteTodo, rescheduleTodo, reschedulingTask, setReschedulingTask }) => {
+const TaskItem = memo(({ todo, toggleTodo, startEditing, editingTaskId, editText, setEditText, saveEdit, handleEditKeyDown, isOverdue, t, isHistoryView, deleteTodo, rescheduleTodo, reschedulingTask, setReschedulingTask }) => {
     const isEditing = editingTaskId === todo.id;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
@@ -73,7 +73,7 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
             <div className="flex items-start gap-3 flex-1 text-left min-w-0">
                 <div onPointerDown={(e) => e.stopPropagation()}>
                     <button
-                        onClick={() => toggleTodo(todo.id)}
+                        onClick={() => toggleTodo(todo.id, todo.completed)}
                         className="mt-0.5 flex-shrink-0 cursor-pointer"
                         style={{ pointerEvents: 'auto' }}
                     >
@@ -105,7 +105,7 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                         />
                     ) : (
                         <button
-                            onClick={() => toggleTodo(todo.id)}
+                            onClick={() => toggleTodo(todo.id, todo.completed)}
                             className="text-left w-full"
                         >
                             <span
@@ -190,7 +190,7 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                                     </button>
                                     <button
                                         onClick={() => {
-                                            deleteTodo(todo.id);
+                                            deleteTodo(todo.id, todo);
                                             setIsMenuOpen(false);
                                         }}
                                         className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
@@ -206,10 +206,10 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
             )}
         </div>
     );
-};
+});
 
 // Sortable wrapper
-const SortableTaskItem = (props) => {
+const SortableTaskItem = memo((props) => {
     const {
         attributes,
         listeners,
@@ -231,7 +231,7 @@ const SortableTaskItem = (props) => {
             <TaskItem {...props} />
         </div>
     );
-};
+});
 
 export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -276,31 +276,31 @@ export default function Todos() {
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editText, setEditText] = useState('');
 
-    const startEditing = (todo) => {
+    const startEditing = useCallback((todo) => {
         setEditingTaskId(todo.id);
         setEditText(todo.text);
-    };
+    }, []);
 
-    const saveEdit = () => {
+    const saveEdit = useCallback(() => {
         if (editingTaskId && editText.trim()) {
             updateTodoText(editingTaskId, editText);
             setEditingTaskId(null);
             setEditText('');
         }
-    };
+    }, [editingTaskId, editText, updateTodoText]);
 
-    const cancelEdit = () => {
+    const cancelEdit = useCallback(() => {
         setEditingTaskId(null);
         setEditText('');
-    };
+    }, []);
 
-    const handleEditKeyDown = (e) => {
+    const handleEditKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             saveEdit();
         } else if (e.key === 'Escape') {
             cancelEdit();
         }
-    };
+    }, [saveEdit, cancelEdit]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -464,7 +464,7 @@ export default function Todos() {
                                         toggleTodo={toggleTodo}
                                         startEditing={startEditing}
                                         editingTaskId={editingTaskId}
-                                        editText={editText}
+                                        editText={editingTaskId === todo.id ? editText : undefined}
                                         setEditText={setEditText}
                                         saveEdit={saveEdit}
                                         handleEditKeyDown={handleEditKeyDown}
@@ -494,7 +494,7 @@ export default function Todos() {
                                         toggleTodo={toggleTodo}
                                         startEditing={startEditing}
                                         editingTaskId={editingTaskId}
-                                        editText={editText}
+                                        editText={editingTaskId === todo.id ? editText : undefined}
                                         setEditText={setEditText}
                                         saveEdit={saveEdit}
                                         handleEditKeyDown={handleEditKeyDown}
