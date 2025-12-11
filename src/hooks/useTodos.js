@@ -62,9 +62,23 @@ export function useTodos(date = null) {
                         return false;
                     }
 
-                    // Show all tasks from today, but only incomplete tasks from previous dates
+                    // Show all tasks from today
+                    if (todoDate.getTime() === today.getTime()) {
+                        return true;
+                    }
+
+                    // For past tasks: show if incomplete OR if completed today
                     if (todoDate.getTime() < today.getTime()) {
-                        return !todo.completed;
+                        if (!todo.completed) return true;
+
+                        // Check if completed today
+                        if (todo.completedAt) {
+                            const completedDate = new Date(todo.completedAt.toDate());
+                            completedDate.setHours(0, 0, 0, 0);
+                            return completedDate.getTime() === today.getTime();
+                        }
+
+                        return false;
                     }
                     return true;
                 });
@@ -101,9 +115,19 @@ export function useTodos(date = null) {
 
         try {
             const todoRef = doc(db, 'users', user.uid, 'todos', id);
-            await updateDoc(todoRef, {
+            const updates = {
                 completed: !currentCompleted
-            });
+            };
+
+            // If we are completing it, set completedAt to now
+            // If we are un-completing it, remove completedAt (or set null)
+            if (!currentCompleted) {
+                updates.completedAt = new Date();
+            } else {
+                updates.completedAt = null;
+            }
+
+            await updateDoc(todoRef, updates);
         } catch (error) {
             console.error('Error toggling todo:', error);
         }
