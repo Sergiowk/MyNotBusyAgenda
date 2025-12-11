@@ -11,8 +11,8 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
 
     if (!isOpen || !date) return null;
 
-    const handleToggle = (id) => {
-        toggleTodo(id);
+    const handleToggle = (id, completed) => {
+        toggleTodo(id, completed);
     };
 
     return (
@@ -47,7 +47,7 @@ export default function DaySummaryModal({ isOpen, onClose, date }) {
                                 {todos.map(todo => (
                                     <li key={todo.id}>
                                         <button
-                                            onClick={() => handleToggle(todo.id)}
+                                            onClick={() => handleToggle(todo.id, todo.completed)}
                                             className="flex items-start gap-2 text-sm w-full text-left p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                                         >
                                             {todo.completed ? (
