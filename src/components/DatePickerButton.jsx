@@ -6,7 +6,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 export default function DatePickerButton({ selectedDate, onDateChange, autoOpen = false, onClose }) {
     const [isOpen, setIsOpen] = useState(autoOpen);
     const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
-    const [position, setPosition] = useState({ top: 0, right: 0 });
+    const [position, setPosition] = useState(null);
     const buttonRef = useRef(null);
     const dropdownRef = useRef(null);
     const { t } = useLanguage();
@@ -33,6 +33,8 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
                 top: rect.bottom + window.scrollY + 8,
                 right: window.innerWidth - rect.right + window.scrollX
             });
+        } else {
+            setPosition(null);
         }
     }, [isOpen]);
 
@@ -107,7 +109,7 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
                 )}
             </button>
 
-            {isOpen && createPortal(
+            {isOpen && position && createPortal(
                 <div
                     ref={dropdownRef}
                     className="fixed p-4 rounded-xl border shadow-xl"
