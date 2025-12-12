@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, BookOpen, LogOut, User } from 'lucide-react';
+import { Home, CheckSquare, BookOpen, LogOut, User, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import UndoSnackbar from './UndoSnackbar';
@@ -24,6 +24,7 @@ export default function Layout() {
     const navItems = [
         { path: '/', icon: Home, label: 'Home' },
         { path: '/todos', icon: CheckSquare, label: 'Todos' },
+        { path: '/habits', icon: Activity, label: 'Habits' },
         { path: '/journal', icon: BookOpen, label: 'Journal' },
     ];
 

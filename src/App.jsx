@@ -5,6 +5,7 @@ import { UndoProvider } from './contexts/UndoContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Todos from './pages/Todos';
+import Habits from './pages/Habits';
 import Journal from './pages/Journal';
 import Login from './pages/Login';
 
@@ -33,6 +34,7 @@ function ProtectedRoutes() {
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="todos" element={<Todos />} />
+        <Route path="habits" element={<Habits />} />
         <Route path="journal" element={<Journal />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
