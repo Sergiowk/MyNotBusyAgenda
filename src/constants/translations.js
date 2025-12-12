@@ -16,6 +16,7 @@ export const translations = {
             entry_deleted: "Entry deleted",
             edited: "(Edited)",
             reschedule: "Reschedule",
+            reset: "Reset"
         },
         auth: {
             welcome: "Welcome back",
@@ -144,7 +145,9 @@ export const translations = {
             frequency_label: "Frequency",
             edit_habit: "Edit Habit",
             view_habit: "Habit Mode",
-            view_compact: "Compact Mode"
+            view_compact: "Compact Mode",
+            manual_entry: "Manual Entry",
+            manual_modal_title: "Add the units here"
         }
     },
     es: {
@@ -164,6 +167,7 @@ export const translations = {
             entry_deleted: "Entrada eliminada",
             edited: "(Editado)",
             reschedule: "Reprogramar",
+            reset: "Reiniciar"
         },
         auth: {
             welcome: "Bienvenido de nuevo",
@@ -289,7 +293,9 @@ export const translations = {
             frequency_label: "Frecuencia",
             edit_habit: "Editar Hábito",
             view_habit: "Modo Hábito",
-            view_compact: "Modo Compacto"
+            view_compact: "Modo Compacto",
+            manual_entry: "Entrada Manual",
+            manual_modal_title: "Añade las unidades aquí"
         }
     },
     zh: {
@@ -309,6 +315,7 @@ export const translations = {
             entry_deleted: "条目已删除",
             edited: "(已编辑)",
             reschedule: "重新安排",
+            reset: "重置"
         },
         auth: {
             welcome: "欢迎回来",
@@ -433,7 +440,9 @@ export const translations = {
             frequency_label: "频率",
             edit_habit: "编辑习惯",
             view_habit: "习惯模式",
-            view_compact: "紧凑模式"
+            view_compact: "紧凑模式",
+            manual_entry: "手动输入",
+            manual_modal_title: "在此添加单位"
         }
     },
     fr: {
@@ -453,6 +462,7 @@ export const translations = {
             entry_deleted: "Entrée supprimée",
             edited: "(Modifié)",
             reschedule: "Reprogrammer",
+            reset: "Réinitialiser"
         },
         auth: {
             welcome: "Bon retour",
@@ -577,7 +587,9 @@ export const translations = {
             frequency_label: "Fréquence",
             edit_habit: "Modifier l'habitude",
             view_habit: "Mode Habitude",
-            view_compact: "Mode Compact"
+            view_compact: "Mode Compact",
+            manual_entry: "Saisie Manuelle",
+            manual_modal_title: "Ajoutez les unités ici"
         }
     },
     de: {
@@ -597,6 +609,7 @@ export const translations = {
             entry_deleted: "Eintrag gelöscht",
             edited: "(Bearbeitet)",
             reschedule: "Verschieben",
+            reset: "Zurücksetzen"
         },
         auth: {
             welcome: "Willkommen zurück",
@@ -721,7 +734,9 @@ export const translations = {
             frequency_label: "Häufigkeit",
             edit_habit: "Gewohnheit bearbeiten",
             view_habit: "Gewohnheitsmodus",
-            view_compact: "Kompaktmodus"
+            view_compact: "Kompaktmodus",
+            manual_entry: "Manuelle Eingabe",
+            manual_modal_title: "Einheiten hier hinzufügen"
         }
     }
 };

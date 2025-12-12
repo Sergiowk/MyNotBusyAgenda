@@ -75,23 +75,14 @@ export function useHabits(date = null, viewMode = 'day') {
                 // Query range
                 q = query(logsRef, where('date', '>=', formatDate(startOfMonth)), where('date', '<=', formatDate(endOfMonth)));
             } else if (viewMode === 'week') {
-                const day = date.getDay();
-                const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-                const startOfWeek = new Date(date.setDate(diff));
-                const endOfWeek = new Date(date.setDate(diff + 6));
+                const startCalc = new Date(date);
+                const day = startCalc.getDay();
+                const diff = startCalc.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
 
-                // Reset date object (since setDate mutates it, but we used it for startOfWeek/endOfWeek calc locally)
-                // Actually `date.setDate(diff)` mutates `date`. This is bad if `date` is a state or prop we depend on?
-                // `startOfWeek` is now a Date object but `date` is mutated. 
-                // Better approach: clone date first.
+                const startOfWeek = new Date(new Date(startCalc).setDate(diff));
+                const endOfWeek = new Date(new Date(startCalc).setDate(diff + 6));
 
-                const curr = new Date(date); // Clone
-                const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
-
-                const start = new Date(curr.setDate(first));
-                const end = new Date(curr.setDate(first + 6));
-
-                q = query(logsRef, where('date', '>=', formatDate(start)), where('date', '<=', formatDate(end)));
+                q = query(logsRef, where('date', '>=', formatDate(startOfWeek)), where('date', '<=', formatDate(endOfWeek)));
             } else {
                 // Day view
                 q = query(logsRef, where('date', '==', dateString));

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Minus, Trash2, Edit2, MoreVertical, Pencil } from 'lucide-react';
+import { Plus, Minus, Trash2, Edit2, MoreVertical, Pencil, Keyboard, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import ManualLogModal from './ManualLogModal';
 import clsx from 'clsx';
 
 export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) {
@@ -10,6 +11,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const [menuPosition, setMenuPosition] = useState('bottom');
+    const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
     // Close menu when clicking outside
     useEffect(() => {
@@ -57,6 +59,10 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
     const handleDecrement = () => {
         const step = type === 'time' ? 15 : 1;
         onLog(habit.id, Math.max(0, current - step));
+    };
+
+    const handleManualSave = (value) => {
+        onLog(habit.id, current + value);
     };
 
     return (
@@ -110,6 +116,17 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
                             <button
                                 onClick={() => {
                                     setIsMenuOpen(false);
+                                    onLog(habit.id, 0);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                <RotateCcw size={14} />
+                                {t('common.reset') || 'Reset'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
                                     onDelete(habit.id);
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
@@ -133,27 +150,46 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
                 />
             </div>
 
-            {/* Controls */}
-            <div className="flex justify-between items-center bg-[var(--color-bg-secondary)] rounded-lg p-1">
-                <button
-                    onClick={handleDecrement}
-                    className="p-2 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors w-12 flex justify-center"
-                    disabled={current <= 0}
-                >
-                    <Minus size={18} />
-                </button>
+            {/* Controls - Split into two groups */}
+            <div className="flex gap-2">
+                {/* Left: Quick Actions Group */}
+                <div className="bg-[var(--color-bg-secondary)] rounded-lg p-1 min-h-[40px] flex items-center gap-1 flex-1 justify-between px-2">
+                    <button
+                        onClick={handleDecrement}
+                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors"
+                        disabled={current <= 0}
+                    >
+                        <Minus size={16} />
+                    </button>
 
-                <span className="text-sm font-medium opacity-80">
-                    {type === 'time' ? '15 min' : '1 unit'}
-                </span>
+                    <span className="text-xs font-medium opacity-70 w-12 text-center select-none">
+                        {type === 'time' ? '15m' : '1'}
+                    </span>
 
+                    <button
+                        onClick={handleIncrement}
+                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors"
+                    >
+                        <Plus size={16} />
+                    </button>
+                </div>
+
+                {/* Right: Manual Entry Button */}
                 <button
-                    onClick={handleIncrement}
-                    className="p-2 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors w-12 flex justify-center"
+                    onClick={() => setIsManualModalOpen(true)}
+                    className="bg-[var(--color-bg-secondary)] rounded-lg px-3 min-h-[40px] flex items-center justify-center hover:bg-[var(--color-bg-primary)] transition-colors text-[var(--color-text-secondary)]"
+                    title={t('habits.manual_entry') || "Manual Entry"}
                 >
-                    <Plus size={18} />
+                    <Keyboard size={18} />
                 </button>
             </div>
+
+            <ManualLogModal
+                isOpen={isManualModalOpen}
+                onClose={() => setIsManualModalOpen(false)}
+                onSave={handleManualSave}
+                habit={habit}
+            />
         </div>
     );
 }

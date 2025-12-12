@@ -29,10 +29,40 @@ export default function Habits() {
         }
     }, [habits, selectedHabitId]);
 
-    const handleMonthChange = (direction) => {
+    const handleDateChange = (amount) => {
         const newDate = new Date(selectedDate);
-        newDate.setMonth(newDate.getMonth() + direction);
+        if (view === 'month') {
+            newDate.setMonth(newDate.getMonth() + amount);
+        } else if (view === 'week') {
+            newDate.setDate(newDate.getDate() + (amount * 7));
+        } else {
+            // Day
+            newDate.setDate(newDate.getDate() + amount);
+        }
         setSelectedDate(newDate);
+    };
+
+    const getDateLabel = () => {
+        if (view === 'month') {
+            return selectedDate.toLocaleDateString(t('locale') || 'en-US', { month: 'long', year: 'numeric' });
+        }
+        if (view === 'week') {
+            // Show start - end of week
+            const curr = new Date(selectedDate);
+            const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
+            const start = new Date(new Date(curr).setDate(first));
+            const end = new Date(new Date(curr).setDate(first + 6));
+
+            const startStr = start.toLocaleDateString(t('locale') || 'en-US', { month: 'short', day: 'numeric' });
+            const endStr = end.toLocaleDateString(t('locale') || 'en-US', { month: 'short', day: 'numeric' });
+            return `${startStr} - ${endStr}`;
+        }
+        // Day
+        const today = new Date();
+        if (selectedDate.toDateString() === today.toDateString()) return t('common.today') || "Today";
+
+        // Check yesterday/tomorrow if desired, or just date
+        return selectedDate.toLocaleDateString(t('locale') || 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     };
 
     const handleSaveHabit = async (habitData) => {
@@ -105,6 +135,29 @@ export default function Habits() {
                     ))}
                 </div>
 
+                {/* Date Navigator */}
+                <div className="flex items-center justify-between bg-[var(--color-bg-card)] p-2 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
+                    <button
+                        onClick={() => handleDateChange(-1)}
+                        className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                        <ChevronLeft size={20} />
+                    </button>
+
+                    <h3 className="font-bold font-serif capitalize text-sm select-none" style={{ color: 'var(--color-text-primary)' }}>
+                        {getDateLabel()}
+                    </h3>
+
+                    <button
+                        onClick={() => handleDateChange(1)}
+                        className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
+
                 {/* Month View Controls */}
                 {view === 'month' && habits.length > 0 && (
                     <div className="space-y-4">
@@ -152,28 +205,6 @@ export default function Habits() {
                             </div>
                         )}
 
-                        {/* Global Navigation (Only in Compact Mode) */}
-                        {monthViewType === 'compact' && (
-                            <div className="flex items-center justify-between bg-[var(--color-bg-card)] p-3 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
-                                <button
-                                    onClick={() => handleMonthChange(-1)}
-                                    className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
-                                    style={{ color: 'var(--color-text-secondary)' }}
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <h3 className="font-bold font-serif capitalize text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                                    {selectedDate.toLocaleDateString(t('locale') || 'en-US', { month: 'long', year: 'numeric' })}
-                                </h3>
-                                <button
-                                    onClick={() => handleMonthChange(1)}
-                                    className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
-                                    style={{ color: 'var(--color-text-secondary)' }}
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
-                            </div>
-                        )}
                     </div>
                 )}
             </header>
@@ -213,7 +244,7 @@ export default function Habits() {
                             habit={habits.find(h => h.id === selectedHabitId)}
                             habitLogs={habitLogs}
                             currentDate={selectedDate}
-                            onMonthChange={handleMonthChange}
+                            onMonthChange={handleDateChange}
                         />
                     ) : (
                         // Compact Grid View
@@ -224,7 +255,7 @@ export default function Habits() {
                                     habit={habit}
                                     habitLogs={habitLogs}
                                     currentDate={selectedDate}
-                                    onMonthChange={handleMonthChange}
+                                    onMonthChange={handleDateChange}
                                     hideController={true}
                                     compact={true}
                                 />
