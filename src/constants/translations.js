@@ -16,6 +16,7 @@ export const translations = {
             entry_deleted: "Entry deleted",
             edited: "(Edited)",
             reschedule: "Reschedule",
+            reset: "Reset"
         },
         auth: {
             welcome: "Welcome back",
@@ -118,6 +119,35 @@ export const translations = {
             journal_section: "Journal Entries",
             no_tasks: "No tasks recorded.",
             no_entries: "No journal entries.",
+        },
+        habits: {
+            title: "Habits",
+            subtitle: "Track your daily goals",
+            create_new: "New Habit",
+            name_label: "Habit Name",
+            name_placeholder: "e.g., Drink Water",
+            type_label: "Type",
+            type_count: "Count",
+            type_time: "Time",
+            type_limit: "Limit",
+            target_label: "Target",
+            unit_label: "Unit (Optional)",
+            unit_placeholder: "e.g., minutes, times",
+            create_button: "Create Habit",
+            empty: "No habits yet. Create one to get started!",
+            view_day: "Day",
+            view_week: "Week",
+            view_month: "Month",
+            view_coming_soon: "View coming soon",
+            type_count_label: "Count",
+            type_time_label: "Time",
+            type_limit_label: "Limit",
+            frequency_label: "Frequency",
+            edit_habit: "Edit Habit",
+            view_habit: "Habit Mode",
+            view_compact: "Compact Mode",
+            manual_entry: "Manual Entry",
+            manual_modal_title: "Add the units here"
         }
     },
     es: {
@@ -137,6 +167,7 @@ export const translations = {
             entry_deleted: "Entrada eliminada",
             edited: "(Editado)",
             reschedule: "Reprogramar",
+            reset: "Reiniciar"
         },
         auth: {
             welcome: "Bienvenido de nuevo",
@@ -239,6 +270,32 @@ export const translations = {
             journal_section: "Entradas del Diario",
             no_tasks: "No hay tareas registradas.",
             no_entries: "No hay entradas en el diario.",
+        },
+        habits: {
+            title: "Hábitos",
+            subtitle: "Rastrea tus objetivos diarios",
+            create_new: "Nuevo Hábito",
+            name_label: "Nombre del Hábito",
+            name_placeholder: "ej., Beber Agua",
+            type_label: "Tipo",
+            type_count: "Conteo",
+            type_time: "Tiempo",
+            type_limit: "Límite",
+            target_label: "Objetivo",
+            unit_label: "Unidad (Opcional)",
+            unit_placeholder: "ej., minutos, veces",
+            create_button: "Crear Hábito",
+            empty: "No hay hábitos. ¡Crea uno para empezar!",
+            view_day: "Día",
+            view_week: "Semana",
+            view_month: "Mes",
+            view_coming_soon: "Vista próximamente",
+            frequency_label: "Frecuencia",
+            edit_habit: "Editar Hábito",
+            view_habit: "Modo Hábito",
+            view_compact: "Modo Compacto",
+            manual_entry: "Entrada Manual",
+            manual_modal_title: "Añade las unidades aquí"
         }
     },
     zh: {
@@ -258,6 +315,7 @@ export const translations = {
             entry_deleted: "条目已删除",
             edited: "(已编辑)",
             reschedule: "重新安排",
+            reset: "重置"
         },
         auth: {
             welcome: "欢迎回来",
@@ -359,6 +417,32 @@ export const translations = {
             journal_section: "日记条目",
             no_tasks: "没有记录的任务。",
             no_entries: "没有日记条目。",
+        },
+        habits: {
+            title: "习惯",
+            subtitle: "追踪您的每日目标",
+            create_new: "新建习惯",
+            name_label: "习惯名称",
+            name_placeholder: "例如：喝水",
+            type_label: "类型",
+            type_count: "计数",
+            type_time: "时间",
+            type_limit: "限制",
+            target_label: "目标",
+            unit_label: "单位 (可选)",
+            unit_placeholder: "例如：分钟，次",
+            create_button: "创建习惯",
+            empty: "暂无习惯。创建一个开始吧！",
+            view_day: "日",
+            view_week: "周",
+            view_month: "月",
+            view_coming_soon: "即将推出",
+            frequency_label: "频率",
+            edit_habit: "编辑习惯",
+            view_habit: "习惯模式",
+            view_compact: "紧凑模式",
+            manual_entry: "手动输入",
+            manual_modal_title: "在此添加单位"
         }
     },
     fr: {
@@ -378,6 +462,7 @@ export const translations = {
             entry_deleted: "Entrée supprimée",
             edited: "(Modifié)",
             reschedule: "Reprogrammer",
+            reset: "Réinitialiser"
         },
         auth: {
             welcome: "Bon retour",
@@ -479,6 +564,32 @@ export const translations = {
             journal_section: "Entrées du journal",
             no_tasks: "Aucune tâche enregistrée.",
             no_entries: "Aucune entrée de journal.",
+        },
+        habits: {
+            title: "Habitudes",
+            subtitle: "Suivez vos objectifs quotidiens",
+            create_new: "Nouvelle Habitude",
+            name_label: "Nom de l'habitude",
+            name_placeholder: "ex : Boire de l'eau",
+            type_label: "Type",
+            type_count: "Compte",
+            type_time: "Temps",
+            type_limit: "Limite",
+            target_label: "Objectif",
+            unit_label: "Unité (Optionnel)",
+            unit_placeholder: "ex : minutes, fois",
+            create_button: "Créer l'habitude",
+            empty: "Pas encore d'habitudes. Créez-en une !",
+            view_day: "Jour",
+            view_week: "Semaine",
+            view_month: "Mois",
+            view_coming_soon: "Bientôt disponible",
+            frequency_label: "Fréquence",
+            edit_habit: "Modifier l'habitude",
+            view_habit: "Mode Habitude",
+            view_compact: "Mode Compact",
+            manual_entry: "Saisie Manuelle",
+            manual_modal_title: "Ajoutez les unités ici"
         }
     },
     de: {
@@ -498,6 +609,7 @@ export const translations = {
             entry_deleted: "Eintrag gelöscht",
             edited: "(Bearbeitet)",
             reschedule: "Verschieben",
+            reset: "Zurücksetzen"
         },
         auth: {
             welcome: "Willkommen zurück",
@@ -599,6 +711,32 @@ export const translations = {
             journal_section: "Journaleinträge",
             no_tasks: "Keine Aufgaben aufgezeichnet.",
             no_entries: "Keine Journaleinträge.",
+        },
+        habits: {
+            title: "Gewohnheiten",
+            subtitle: "Verfolgen Sie Ihre täglichen Ziele",
+            create_new: "Neue Gewohnheit",
+            name_label: "Gewohnheitsname",
+            name_placeholder: "z.B. Wasser trinken",
+            type_label: "Typ",
+            type_count: "Anzahl",
+            type_time: "Zeit",
+            type_limit: "Limit",
+            target_label: "Ziel",
+            unit_label: "Einheit (Optional)",
+            unit_placeholder: "z.B. Minuten, Mal",
+            create_button: "Gewohnheit erstellen",
+            empty: "Noch keine Gewohnheiten. Erstellen Sie eine!",
+            view_day: "Tag",
+            view_week: "Woche",
+            view_month: "Monat",
+            view_coming_soon: "Demnächst verfügbar",
+            frequency_label: "Häufigkeit",
+            edit_habit: "Gewohnheit bearbeiten",
+            view_habit: "Gewohnheitsmodus",
+            view_compact: "Kompaktmodus",
+            manual_entry: "Manuelle Eingabe",
+            manual_modal_title: "Einheiten hier hinzufügen"
         }
     }
 };
