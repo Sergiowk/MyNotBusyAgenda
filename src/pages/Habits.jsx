@@ -5,7 +5,7 @@ import HabitCreationModal from '../components/HabitCreationModal';
 import HabitGrid from '../components/HabitGrid';
 import HabitCalendar from '../components/HabitCalendar';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Plus, Activity } from 'lucide-react';
+import { Plus, Activity, ChevronLeft, ChevronRight, LayoutGrid, Square } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Habits() {
@@ -20,6 +20,7 @@ export default function Habits() {
 
     // Month View Selection
     const [selectedHabitId, setSelectedHabitId] = useState(null);
+    const [monthViewType, setMonthViewType] = useState('single'); // 'single' | 'compact'
 
     // Default to first habit when entering month view or when habits load
     useEffect(() => {
@@ -104,23 +105,75 @@ export default function Habits() {
                     ))}
                 </div>
 
-                {/* Month View Habit Selector */}
+                {/* Month View Controls */}
                 {view === 'month' && habits.length > 0 && (
-                    <div className="w-full">
-                        <select
-                            value={selectedHabitId || ''}
-                            onChange={(e) => setSelectedHabitId(e.target.value)}
-                            className="w-full p-3 rounded-xl border appearance-none outline-none font-medium cursor-pointer transition-colors"
-                            style={{
-                                backgroundColor: 'var(--color-bg-card)',
-                                borderColor: 'var(--color-border)',
-                                color: 'var(--color-text-primary)'
-                            }}
-                        >
-                            {habits.map(h => (
-                                <option key={h.id} value={h.id}>{h.name}</option>
-                            ))}
-                        </select>
+                    <div className="space-y-4">
+                        {/* Sub-selector: Detail (Single) vs Compact (All) */}
+                        <div className="flex p-1 bg-[var(--color-bg-secondary)] rounded-xl w-full">
+                            <button
+                                onClick={() => setMonthViewType('single')}
+                                className={clsx(
+                                    "flex-1 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all",
+                                    monthViewType === 'single' ? "bg-[var(--color-bg-card)] shadow-sm text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] hover:opacity-80"
+                                )}
+                            >
+                                <Square size={16} />
+                                {t('habits.view_habit') || "Habit Mode"}
+                            </button>
+                            <button
+                                onClick={() => setMonthViewType('compact')}
+                                className={clsx(
+                                    "flex-1 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all",
+                                    monthViewType === 'compact' ? "bg-[var(--color-bg-card)] shadow-sm text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] hover:opacity-80"
+                                )}
+                            >
+                                <LayoutGrid size={16} />
+                                {t('habits.view_compact') || "Compact Mode"}
+                            </button>
+                        </div>
+
+                        {/* Habit Selector (Only in Single Mode) */}
+                        {monthViewType === 'single' && (
+                            <div className="w-full">
+                                <select
+                                    value={selectedHabitId || ''}
+                                    onChange={(e) => setSelectedHabitId(e.target.value)}
+                                    className="w-full p-3 rounded-xl border appearance-none outline-none font-medium cursor-pointer transition-colors"
+                                    style={{
+                                        backgroundColor: 'var(--color-bg-card)',
+                                        borderColor: 'var(--color-border)',
+                                        color: 'var(--color-text-primary)'
+                                    }}
+                                >
+                                    {habits.map(h => (
+                                        <option key={h.id} value={h.id}>{h.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {/* Global Navigation (Only in Compact Mode) */}
+                        {monthViewType === 'compact' && (
+                            <div className="flex items-center justify-between bg-[var(--color-bg-card)] p-3 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
+                                <button
+                                    onClick={() => handleMonthChange(-1)}
+                                    className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                                    style={{ color: 'var(--color-text-secondary)' }}
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <h3 className="font-bold font-serif capitalize text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                                    {selectedDate.toLocaleDateString(t('locale') || 'en-US', { month: 'long', year: 'numeric' })}
+                                </h3>
+                                <button
+                                    onClick={() => handleMonthChange(1)}
+                                    className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                                    style={{ color: 'var(--color-text-secondary)' }}
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </header>
@@ -155,12 +208,29 @@ export default function Habits() {
                     />
                 ) : (
                     // Month View
-                    <HabitCalendar
-                        habit={habits.find(h => h.id === selectedHabitId)}
-                        habitLogs={habitLogs}
-                        currentDate={selectedDate}
-                        onMonthChange={handleMonthChange}
-                    />
+                    monthViewType === 'single' ? (
+                        <HabitCalendar
+                            habit={habits.find(h => h.id === selectedHabitId)}
+                            habitLogs={habitLogs}
+                            currentDate={selectedDate}
+                            onMonthChange={handleMonthChange}
+                        />
+                    ) : (
+                        // Compact Grid View
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {habits.map(habit => (
+                                <HabitCalendar
+                                    key={habit.id}
+                                    habit={habit}
+                                    habitLogs={habitLogs}
+                                    currentDate={selectedDate}
+                                    onMonthChange={handleMonthChange}
+                                    hideController={true}
+                                    compact={true}
+                                />
+                            ))}
+                        </div>
+                    )
                 )}
             </main>
 

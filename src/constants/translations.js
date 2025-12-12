@@ -142,7 +142,9 @@ export const translations = {
             type_time_label: "Time",
             type_limit_label: "Limit",
             frequency_label: "Frequency",
-            edit_habit: "Edit Habit"
+            edit_habit: "Edit Habit",
+            view_habit: "Habit Mode",
+            view_compact: "Compact Mode"
         }
     },
     es: {
@@ -285,7 +287,9 @@ export const translations = {
             view_month: "Mes",
             view_coming_soon: "Vista próximamente",
             frequency_label: "Frecuencia",
-            edit_habit: "Editar Hábito"
+            edit_habit: "Editar Hábito",
+            view_habit: "Modo Hábito",
+            view_compact: "Modo Compacto"
         }
     },
     zh: {
@@ -427,7 +431,9 @@ export const translations = {
             view_month: "月",
             view_coming_soon: "即将推出",
             frequency_label: "频率",
-            edit_habit: "编辑习惯"
+            edit_habit: "编辑习惯",
+            view_habit: "习惯模式",
+            view_compact: "紧凑模式"
         }
     },
     fr: {
@@ -569,7 +575,9 @@ export const translations = {
             view_month: "Mois",
             view_coming_soon: "Bientôt disponible",
             frequency_label: "Fréquence",
-            edit_habit: "Modifier l'habitude"
+            edit_habit: "Modifier l'habitude",
+            view_habit: "Mode Habitude",
+            view_compact: "Mode Compact"
         }
     },
     de: {
@@ -711,7 +719,9 @@ export const translations = {
             view_month: "Monat",
             view_coming_soon: "Demnächst verfügbar",
             frequency_label: "Häufigkeit",
-            edit_habit: "Gewohnheit bearbeiten"
+            edit_habit: "Gewohnheit bearbeiten",
+            view_habit: "Gewohnheitsmodus",
+            view_compact: "Kompaktmodus"
         }
     }
 };

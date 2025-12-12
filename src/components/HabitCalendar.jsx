@@ -3,7 +3,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
-export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthChange }) {
+export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthChange, hideController = false, compact = false }) {
     const { t, language } = useLanguage();
 
     // Determine current month/year from passed date
@@ -52,26 +52,28 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
     return (
         <div className="rounded-2xl border p-4 shadow-sm" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-card)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold font-serif capitalize" style={{ color: 'var(--color-text-primary)' }}>
-                    {currentDate.toLocaleDateString(language, { month: 'long', year: 'numeric' })}
+            <div className={clsx("flex items-center justify-between mb-4", compact && "mb-2")}>
+                <h3 className={clsx("font-bold font-serif capitalize", compact ? "text-base" : "text-lg")} style={{ color: 'var(--color-text-primary)' }}>
+                    {hideController ? habit.name : currentDate.toLocaleDateString(language, { month: 'long', year: 'numeric' })}
                 </h3>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => onMonthChange(-1)}
-                        className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                        <ChevronLeft size={20} />
-                    </button>
-                    <button
-                        onClick={() => onMonthChange(1)}
-                        className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                        <ChevronRight size={20} />
-                    </button>
-                </div>
+                {!hideController && (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => onMonthChange(-1)}
+                            className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <button
+                            onClick={() => onMonthChange(1)}
+                            className="p-1.5 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Grid */}
@@ -132,7 +134,8 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                         <div
                             key={d.dateString}
                             className={clsx(
-                                "aspect-square rounded-lg flex items-center justify-center relative text-sm font-medium transition-all hover:opacity-90",
+                                "aspect-square rounded-lg flex items-center justify-center relative font-medium transition-all hover:opacity-90",
+                                compact ? "text-xs" : "text-sm",
                                 isLocalToday && "ring-2 ring-offset-1 ring-[var(--color-accent)]"
                             )}
                             style={{
@@ -149,12 +152,14 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                 })}
             </div>
 
-            {/* Legend? Optional */}
-            <div className="flex justify-center gap-4 mt-6 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#22c55e]"></div> Complete</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#eab308]"></div> Partial</div>
-                <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[var(--color-bg-secondary)] relative overflow-hidden"><div className="absolute inset-0 flex items-center justify-center opacity-50"><span className="text-[8px] transform -rotate-45">/</span></div></div> Unscheduled</div>
-            </div>
+            {/* Legend - Hide in compact mode */}
+            {!compact && (
+                <div className="flex justify-center gap-4 mt-6 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#22c55e]"></div> Complete</div>
+                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[#eab308]"></div> Partial</div>
+                    <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-[var(--color-bg-secondary)] relative overflow-hidden"><div className="absolute inset-0 flex items-center justify-center opacity-50"><span className="text-[8px] transform -rotate-45">/</span></div></div> Unscheduled</div>
+                </div>
+            )}
         </div>
     );
 }
