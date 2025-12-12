@@ -12,7 +12,7 @@ import clsx from 'clsx';
 export default function Dashboard() {
     const { focus, setFocusText, toggleFocus } = useFocus();
     const { todos, toggleTodo } = useTodos();
-    const { greeting, formattedTime } = useClock();
+    const { greeting, formattedTime, formattedDate } = useClock();
     const { t } = useLanguage();
     const [isEditing, setIsEditing] = useState(!focus.text);
     const [selectedDate, setSelectedDate] = useState(null);
@@ -40,6 +40,9 @@ export default function Dashboard() {
                 <div className="text-right">
                     <div className="text-3xl font-semibold tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
                         {formattedTime}
+                    </div>
+                    <div className="text-lg font-medium opacity-80" style={{ color: 'var(--color-text-secondary)' }}>
+                        {formattedDate}
                     </div>
                 </div>
             </header>
