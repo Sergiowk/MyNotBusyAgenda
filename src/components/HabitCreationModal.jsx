@@ -1,14 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { X, Check, Activity, Clock, Ban } from 'lucide-react';
+import clsx from 'clsx';
 
-export default function HabitCreationModal({ isOpen, onClose, onSave }) {
+export default function HabitCreationModal({ isOpen, onClose, onSave, initialData = null }) {
     const { t } = useLanguage();
     const [name, setName] = useState('');
     const [type, setType] = useState('count'); // count, time, limit
     const [target, setTarget] = useState(1);
     const [unit, setUnit] = useState('');
+    const [frequency, setFrequency] = useState([0, 1, 2, 3, 4, 5, 6]); // All days selected by default
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                setName(initialData.name);
+                setType(initialData.type);
+                setTarget(initialData.target);
+                setUnit(initialData.unit || '');
+                setFrequency(initialData.frequency || [0, 1, 2, 3, 4, 5, 6]);
+            } else {
+                // Reset for new creation
+                setName('');
+                setType('count');
+                setTarget(1);
+                setUnit('');
+                setFrequency([0, 1, 2, 3, 4, 5, 6]);
+            }
+        }
+    }, [isOpen, initialData]);
 
     if (!isOpen) return null;
 
@@ -19,16 +40,13 @@ export default function HabitCreationModal({ isOpen, onClose, onSave }) {
         setLoading(true);
         try {
             await onSave({
+                id: initialData?.id, // Pass ID if editing
                 name: name.trim(),
                 type,
                 target: Number(target),
-                unit: unit.trim()
+                unit: unit.trim(),
+                frequency
             });
-            // Reset and close
-            setName('');
-            setType('count');
-            setTarget(1);
-            setUnit('');
             onClose();
         } catch (error) {
             console.error(error);
@@ -36,6 +54,27 @@ export default function HabitCreationModal({ isOpen, onClose, onSave }) {
             setLoading(false);
         }
     };
+
+    const toggleDay = (dayIndex) => {
+        setFrequency(prev => {
+            if (prev.includes(dayIndex)) {
+                // Don't allow empty frequency? Or maybe allow it (habit paused)
+                return prev.filter(d => d !== dayIndex);
+            } else {
+                return [...prev, dayIndex].sort();
+            }
+        });
+    };
+
+    const days = [
+        { key: 0, label: 'S' }, // JS getDay(): 0=Sun
+        { key: 1, label: 'M' },
+        { key: 2, label: 'T' },
+        { key: 3, label: 'W' },
+        { key: 4, label: 'T' },
+        { key: 5, label: 'F' },
+        { key: 6, label: 'S' }
+    ];
 
     const getTypeIcon = (t) => {
         switch (t) {
@@ -57,7 +96,9 @@ export default function HabitCreationModal({ isOpen, onClose, onSave }) {
                 }}
             >
                 <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
-                    <h2 className="text-xl font-semibold">{t('habits.create_new') || 'New Habit'}</h2>
+                    <h2 className="text-xl font-semibold">
+                        {initialData ? (t('habits.edit_habit') || 'Edit Habit') : (t('habits.create_new') || 'New Habit')}
+                    </h2>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
@@ -82,6 +123,31 @@ export default function HabitCreationModal({ isOpen, onClose, onSave }) {
                                 className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
                                 style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                             />
+                        </div>
+
+                        {/* Frequency Selector */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.frequency_label') || 'Frequency'}
+                            </label>
+                            <div className="flex justify-between gap-1">
+                                {days.map((day) => (
+                                    <button
+                                        key={day.key}
+                                        type="button"
+                                        onClick={() => toggleDay(day.key)}
+                                        className={clsx(
+                                            "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all",
+                                            frequency.includes(day.key)
+                                                ? "bg-[var(--color-accent)] text-white shadow-sm"
+                                                : "bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-primary)]"
+                                        )}
+                                        style={!frequency.includes(day.key) ? { borderColor: 'var(--color-border)', border: '1px solid' } : {}}
+                                    >
+                                        {day.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Type Selection */}
@@ -147,7 +213,7 @@ export default function HabitCreationModal({ isOpen, onClose, onSave }) {
                             {loading ? (t('common.saving') || 'Saving...') : (
                                 <>
                                     <Check size={18} />
-                                    {t('habits.create_button') || 'Create Habit'}
+                                    {initialData ? (t('common.save') || 'Save') : (t('habits.create_button') || 'Create Habit')}
                                 </>
                             )}
                         </button>

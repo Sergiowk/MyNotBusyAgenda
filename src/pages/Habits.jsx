@@ -9,14 +9,33 @@ import clsx from 'clsx';
 export default function Habits() {
     const [view, setView] = useState('day'); // day, week, month
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingHabit, setEditingHabit] = useState(null); // State for habit being edited
     const { t } = useLanguage();
 
     // For now we default to today. Future: add date navigation.
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { habits, habitLogs, addHabit, deleteHabit, logHabitProgress } = useHabits(selectedDate);
+    const { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress } = useHabits(selectedDate);
 
-    const handleCreateHabit = async (habitData) => {
-        await addHabit(habitData);
+    const handleSaveHabit = async (habitData) => {
+        if (habitData.id) {
+            // Update existing
+            const { id, ...data } = habitData;
+            await updateHabit(id, data);
+        } else {
+            // Create new
+            const { id, ...data } = habitData;
+            await addHabit(data);
+        }
+    };
+
+    const openEditModal = (habit) => {
+        setEditingHabit(habit);
+        setIsCreateModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsCreateModalOpen(false);
+        setEditingHabit(null);
     };
 
     const handleLogProgress = (habitId, value) => {
@@ -37,7 +56,10 @@ export default function Habits() {
                     </div>
                     {/* Add Button (Desktop/Header) */}
                     <button
-                        onClick={() => setIsCreateModalOpen(true)}
+                        onClick={() => {
+                            setEditingHabit(null);
+                            setIsCreateModalOpen(true);
+                        }}
                         className="p-2 rounded-xl text-white transition-opacity hover:opacity-90 shadow-lg"
                         style={{ backgroundColor: 'var(--color-accent)' }}
                     >
@@ -81,6 +103,7 @@ export default function Habits() {
                                     logValue={habitLogs[habit.id]}
                                     onLog={handleLogProgress}
                                     onDelete={deleteHabit}
+                                    onEdit={openEditModal}
                                 />
                             ))
                         )}
@@ -95,8 +118,9 @@ export default function Habits() {
 
             <HabitCreationModal
                 isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSave={handleCreateHabit}
+                onClose={handleCloseModal}
+                onSave={handleSaveHabit}
+                initialData={editingHabit}
             />
         </div>
     );

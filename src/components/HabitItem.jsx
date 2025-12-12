@@ -1,10 +1,40 @@
-import { Plus, Minus, Trash2, Edit2, Clock } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Plus, Minus, Trash2, Edit2, MoreVertical, Pencil } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import clsx from 'clsx';
 
-export default function HabitItem({ habit, logValue, onLog, onDelete }) {
+export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) {
     const { t } = useLanguage();
     const current = logValue || 0;
     const { name, target, unit, type } = habit;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+    const [menuPosition, setMenuPosition] = useState('bottom');
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        }
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isMenuOpen]);
+
+    const toggleMenu = () => {
+        if (!isMenuOpen) {
+            // Check space below
+            if (menuRef.current) {
+                const rect = menuRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                setMenuPosition(spaceBelow < 150 ? 'top' : 'bottom');
+            }
+        }
+        setIsMenuOpen(!isMenuOpen);
+    };
 
     // Calculate progress percentage
     const progress = Math.min(100, Math.max(0, (current / target) * 100));
@@ -20,7 +50,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete }) {
     }
 
     const handleIncrement = () => {
-        const step = type === 'time' ? 15 : 1; // Default 15 mins for time, 1 for count
+        const step = type === 'time' ? 15 : 1;
         onLog(habit.id, current + step);
     };
 
@@ -31,7 +61,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete }) {
 
     return (
         <div
-            className="p-4 rounded-xl border mb-3 transition-all"
+            className="p-4 rounded-xl border mb-3 transition-all relative"
             style={{
                 backgroundColor: 'var(--color-bg-card)',
                 borderColor: 'var(--color-border)',
@@ -45,13 +75,50 @@ export default function HabitItem({ habit, logValue, onLog, onDelete }) {
                         {current} / {target} {unit || (type === 'time' ? 'min' : '')}
                     </div>
                 </div>
-                <div className="flex gap-2">
+
+                {/* Menu */}
+                <div ref={menuRef} className="relative z-10">
                     <button
-                        onClick={() => onDelete(habit.id)}
-                        className="p-1.5 rounded-lg hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:text-red-400 transition-colors"
+                        onClick={toggleMenu}
+                        className="p-1.5 rounded-lg hover:bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] transition-colors"
                     >
-                        <Trash2 size={16} />
+                        <MoreVertical size={20} />
                     </button>
+
+                    {isMenuOpen && (
+                        <div
+                            className={clsx(
+                                "absolute right-0 w-32 rounded-xl shadow-lg border overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-100",
+                                menuPosition === 'top' ? "bottom-full mb-2" : "top-full mt-1"
+                            )}
+                            style={{
+                                backgroundColor: 'var(--color-bg-card)',
+                                borderColor: 'var(--color-border)',
+                            }}
+                        >
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    onEdit(habit);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                <Pencil size={14} />
+                                {t('common.edit') || 'Edit'}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    onDelete(habit.id);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
+                            >
+                                <Trash2 size={14} />
+                                {t('common.delete') || 'Delete'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 

@@ -27,6 +27,10 @@ export function useHabits(date = null) {
                     ...data,
                     name: decryptData(data.name, user.uid)
                 };
+            }).filter(habit => {
+                if (!date || !habit.frequency) return true; // Show all if no date or no frequency set
+                const dayOfWeek = date.getDay(); // 0 (Sun) - 6 (Sat)
+                return habit.frequency.includes(dayOfWeek);
             });
             setHabits(habitsData);
         });
@@ -88,6 +92,10 @@ export function useHabits(date = null) {
                 ...data,
                 name: encryptedName,
                 createdAt: new Date(),
+                name: encryptedName,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                frequency: data.frequency || [0, 1, 2, 3, 4, 5, 6], // Default to every day
                 archived: false
             });
         } catch (error) {

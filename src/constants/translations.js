@@ -140,7 +140,9 @@ export const translations = {
             view_coming_soon: "View coming soon",
             type_count_label: "Count",
             type_time_label: "Time",
-            type_limit_label: "Limit"
+            type_limit_label: "Limit",
+            frequency_label: "Frequency",
+            edit_habit: "Edit Habit"
         }
     },
     es: {
@@ -282,6 +284,8 @@ export const translations = {
             view_week: "Semana",
             view_month: "Mes",
             view_coming_soon: "Vista próximamente",
+            frequency_label: "Frecuencia",
+            edit_habit: "Editar Hábito"
         }
     },
     zh: {
@@ -422,6 +426,8 @@ export const translations = {
             view_week: "周",
             view_month: "月",
             view_coming_soon: "即将推出",
+            frequency_label: "频率",
+            edit_habit: "编辑习惯"
         }
     },
     fr: {
@@ -562,6 +568,8 @@ export const translations = {
             view_week: "Semaine",
             view_month: "Mois",
             view_coming_soon: "Bientôt disponible",
+            frequency_label: "Fréquence",
+            edit_habit: "Modifier l'habitude"
         }
     },
     de: {
@@ -702,6 +710,8 @@ export const translations = {
             view_week: "Woche",
             view_month: "Monat",
             view_coming_soon: "Demnächst verfügbar",
+            frequency_label: "Häufigkeit",
+            edit_habit: "Gewohnheit bearbeiten"
         }
     }
 };
