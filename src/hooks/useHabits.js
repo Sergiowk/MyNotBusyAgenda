@@ -4,7 +4,7 @@ import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { encryptData, decryptData } from '../utils/encryption';
 
-export function useHabits(date = null) {
+export function useHabits(date = null, viewMode = 'day') {
     const [habits, setHabits] = useState([]);
     const [habitLogs, setHabitLogs] = useState({}); // Map of habitId -> logValue
     const { user } = useAuth();
@@ -56,16 +56,54 @@ export function useHabits(date = null) {
             // Let's use: users/{uid}/habit_logs
             // Documents will be keyed by `${habitId}_${dateString}` to ensure uniqueness/easy access
 
-            const dateString = date.toISOString().split('T')[0];
-            const logsRef = collection(db, 'users', user.uid, 'habit_logs');
-            const q = query(logsRef, where('date', '==', dateString));
 
-            // Realtime listener for logs on this date
+            // Helper to format date as YYYY-MM-DD in local time
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const dateString = formatDate(date);
+            const logsRef = collection(db, 'users', user.uid, 'habit_logs');
+            let q;
+
+            if (viewMode === 'month') {
+                const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+                const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+                // Query range
+                q = query(logsRef, where('date', '>=', formatDate(startOfMonth)), where('date', '<=', formatDate(endOfMonth)));
+            } else if (viewMode === 'week') {
+                const day = date.getDay();
+                const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+                const startOfWeek = new Date(date.setDate(diff));
+                const endOfWeek = new Date(date.setDate(diff + 6));
+
+                // Reset date object (since setDate mutates it, but we used it for startOfWeek/endOfWeek calc locally)
+                // Actually `date.setDate(diff)` mutates `date`. This is bad if `date` is a state or prop we depend on?
+                // `startOfWeek` is now a Date object but `date` is mutated. 
+                // Better approach: clone date first.
+
+                const curr = new Date(date); // Clone
+                const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
+
+                const start = new Date(curr.setDate(first));
+                const end = new Date(curr.setDate(first + 6));
+
+                q = query(logsRef, where('date', '>=', formatDate(start)), where('date', '<=', formatDate(end)));
+            } else {
+                // Day view
+                q = query(logsRef, where('date', '==', dateString));
+            }
+
+            // Realtime listener for logs
             const unsubscribe = onSnapshot(q, (snapshot) => {
-                const logs = {};
+                const logs = {}; // Structure: { [habitId]: { [date]: value } }
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    logs[data.habitId] = data.value;
+                    if (!logs[data.habitId]) logs[data.habitId] = {};
+                    logs[data.habitId][data.date] = data.value;
                 });
                 setHabitLogs(logs);
             });
@@ -82,7 +120,7 @@ export function useHabits(date = null) {
 
         return () => unsubscribeFunc();
 
-    }, [user, date]);
+    }, [user, date, viewMode]);
 
     const addHabit = useCallback(async (data) => {
         if (!user) return;
@@ -135,7 +173,11 @@ export function useHabits(date = null) {
     const logHabitProgress = useCallback(async (habitId, value, dateObj = new Date()) => {
         if (!user) return;
         try {
-            const dateString = dateObj.toISOString().split('T')[0];
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            const dateString = `${year}-${month}-${day}`;
+
             const logId = `${habitId}_${dateString}`;
             const logRef = doc(db, 'users', user.uid, 'habit_logs', logId);
 

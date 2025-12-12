@@ -1,20 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHabits } from '../hooks/useHabits';
 import HabitItem from '../components/HabitItem';
 import HabitCreationModal from '../components/HabitCreationModal';
+import HabitGrid from '../components/HabitGrid';
+import HabitCalendar from '../components/HabitCalendar';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Plus, Calendar, BarChart2, Activity } from 'lucide-react';
+import { Plus, Activity } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function Habits() {
     const [view, setView] = useState('day'); // day, week, month
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [editingHabit, setEditingHabit] = useState(null); // State for habit being edited
+    const [editingHabit, setEditingHabit] = useState(null);
     const { t } = useLanguage();
 
     // For now we default to today. Future: add date navigation.
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress } = useHabits(selectedDate);
+    const { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress } = useHabits(selectedDate, view);
+
+    // Month View Selection
+    const [selectedHabitId, setSelectedHabitId] = useState(null);
+
+    // Default to first habit when entering month view or when habits load
+    useEffect(() => {
+        if (habits.length > 0 && !selectedHabitId) {
+            setSelectedHabitId(habits[0].id);
+        }
+    }, [habits, selectedHabitId]);
+
+    const handleMonthChange = (direction) => {
+        const newDate = new Date(selectedDate);
+        newDate.setMonth(newDate.getMonth() + direction);
+        setSelectedDate(newDate);
+    };
 
     const handleSaveHabit = async (habitData) => {
         if (habitData.id) {
@@ -85,6 +103,26 @@ export default function Habits() {
                         </button>
                     ))}
                 </div>
+
+                {/* Month View Habit Selector */}
+                {view === 'month' && habits.length > 0 && (
+                    <div className="w-full">
+                        <select
+                            value={selectedHabitId || ''}
+                            onChange={(e) => setSelectedHabitId(e.target.value)}
+                            className="w-full p-3 rounded-xl border appearance-none outline-none font-medium cursor-pointer transition-colors"
+                            style={{
+                                backgroundColor: 'var(--color-bg-card)',
+                                borderColor: 'var(--color-border)',
+                                color: 'var(--color-text-primary)'
+                            }}
+                        >
+                            {habits.map(h => (
+                                <option key={h.id} value={h.id}>{h.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
             </header>
 
             <main>
@@ -100,7 +138,7 @@ export default function Habits() {
                                 <HabitItem
                                     key={habit.id}
                                     habit={habit}
-                                    logValue={habitLogs[habit.id]}
+                                    logValue={habitLogs[habit.id]?.[`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`]}
                                     onLog={handleLogProgress}
                                     onDelete={deleteHabit}
                                     onEdit={openEditModal}
@@ -108,11 +146,21 @@ export default function Habits() {
                             ))
                         )}
                     </div>
+                ) : view === 'week' ? (
+                    <HabitGrid
+                        habits={habits}
+                        habitLogs={habitLogs}
+                        currentDate={selectedDate}
+                        viewMode={view}
+                    />
                 ) : (
-                    <div className="text-center py-12 rounded-xl border border-dashed" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}>
-                        <BarChart2 className="mx-auto mb-3 opacity-50" size={48} />
-                        <p>{t('habits.view_coming_soon') || `${view.charAt(0).toUpperCase() + view.slice(1)} view coming soon`}</p>
-                    </div>
+                    // Month View
+                    <HabitCalendar
+                        habit={habits.find(h => h.id === selectedHabitId)}
+                        habitLogs={habitLogs}
+                        currentDate={selectedDate}
+                        onMonthChange={handleMonthChange}
+                    />
                 )}
             </main>
 
