@@ -43,6 +43,7 @@ function ProtectedRoutes() {
 }
 
 import { ThemeProvider } from './contexts/ThemeContext';
+import { SettingsProvider } from './contexts/SettingsContext';
 
 function App() {
   return (
@@ -50,9 +51,11 @@ function App() {
       <LanguageProvider>
         <ThemeProvider>
           <UndoProvider>
-            <BrowserRouter basename={import.meta.env.BASE_URL}>
-              <ProtectedRoutes />
-            </BrowserRouter>
+            <SettingsProvider>
+              <BrowserRouter basename={import.meta.env.BASE_URL}>
+                <ProtectedRoutes />
+              </BrowserRouter>
+            </SettingsProvider>
           </UndoProvider>
         </ThemeProvider>
       </LanguageProvider>

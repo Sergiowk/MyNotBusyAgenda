@@ -4,10 +4,14 @@ import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { encryptData, decryptData } from '../utils/encryption';
 
+import { useSettings } from '../contexts/SettingsContext';
+
 export function useHabits(date = null, viewMode = 'day') {
     const [habits, setHabits] = useState([]);
     const [habitLogs, setHabitLogs] = useState({}); // Map of habitId -> logValue
     const { user } = useAuth();
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
 
     // 1. Fetch Habits Definitions
     useEffect(() => {
@@ -77,12 +81,18 @@ export function useHabits(date = null, viewMode = 'day') {
             } else if (viewMode === 'week') {
                 const startCalc = new Date(date);
                 const day = startCalc.getDay();
-                const diff = startCalc.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
 
-                const startOfWeek = new Date(new Date(startCalc).setDate(diff));
-                const endOfWeek = new Date(new Date(startCalc).setDate(diff + 6));
+                let diff;
+                if (startOfWeek === 'monday') {
+                    diff = startCalc.getDate() - day + (day === 0 ? -6 : 1);
+                } else {
+                    diff = startCalc.getDate() - day; // Sunday start
+                }
 
-                q = query(logsRef, where('date', '>=', formatDate(startOfWeek)), where('date', '<=', formatDate(endOfWeek)));
+                const startOfWeekDate = new Date(new Date(startCalc).setDate(diff));
+                const endOfWeekDate = new Date(new Date(startCalc).setDate(diff + 6));
+
+                q = query(logsRef, where('date', '>=', formatDate(startOfWeekDate)), where('date', '<=', formatDate(endOfWeekDate)));
             } else {
                 // Day view
                 q = query(logsRef, where('date', '==', dateString));
@@ -111,7 +121,7 @@ export function useHabits(date = null, viewMode = 'day') {
 
         return () => unsubscribeFunc();
 
-    }, [user, date, viewMode]);
+    }, [user, date, viewMode, startOfWeek]);
 
     const addHabit = useCallback(async (data) => {
         if (!user) return;

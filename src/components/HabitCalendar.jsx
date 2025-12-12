@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -10,11 +11,19 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
 
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
+
     // Logic to build calendar days
     const calendarDays = useMemo(() => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDayIdx = new Date(year, month, 1).getDay(); // 0 Sun - 6 Sat
-        const startOffset = firstDayIdx === 0 ? 6 : firstDayIdx - 1; // Mon start
+        let firstDayIdx = new Date(year, month, 1).getDay(); // 0 Sun - 6 Sat
+
+        // Adjust for start of week preference
+        let startOffset = firstDayIdx;
+        if (startOfWeek === 'monday') {
+            startOffset = firstDayIdx === 0 ? 6 : firstDayIdx - 1;
+        }
 
         const days = [];
         // Empty slots
@@ -33,17 +42,19 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
             });
         }
         return days;
-    }, [year, month]);
+    }, [year, month, startOfWeek]);
 
-    // Week Headers (Mon-Sun)
+    // Week Headers
     const weekDays = useMemo(() => {
-        // e.g. Mon, Tue... based on locale
-        // Create ref date starting Monday
+        // Create ref date starting from correct day
+        // Jan 1 2023 was Sunday, Jan 2 2023 was Monday
+        const startDay = startOfWeek === 'monday' ? 2 : 1;
+
         return Array.from({ length: 7 }, (_, i) => {
-            const d = new Date(2023, 0, i + 2); // Jan 2 2023 is Mon
+            const d = new Date(2023, 0, i + startDay);
             return d.toLocaleDateString(language, { weekday: 'short' });
         });
-    }, [language]);
+    }, [language, startOfWeek]);
 
     if (!habit) {
         return <div className="text-center py-8 opacity-50">Select a habit to view calendar</div>;

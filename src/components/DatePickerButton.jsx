@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar as CalendarIcon, X } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 export default function DatePickerButton({ selectedDate, onDateChange, autoOpen = false, onClose }) {
     const [isOpen, setIsOpen] = useState(autoOpen);
@@ -9,7 +10,7 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
     const [position, setPosition] = useState(null);
     const buttonRef = useRef(null);
     const dropdownRef = useRef(null);
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
 
     // Check for mobile view
     const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
@@ -92,13 +93,22 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
         }
     }, [isOpen, isMobile]);
 
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
+
     const getDaysInMonth = (date) => {
         const year = date.getFullYear();
         const month = date.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
-        const startingDayOfWeek = firstDay.getDay();
+
+        const day = firstDay.getDay(); // 0 (Sun) - 6 (Sat)
+        let startingDayOfWeek = day;
+
+        if (startOfWeek === 'monday') {
+            startingDayOfWeek = day === 0 ? 6 : day - 1;
+        }
 
         return { daysInMonth, startingDayOfWeek };
     };
@@ -208,15 +218,27 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
 
                             {/* Day Headers */}
                             <div className="grid grid-cols-7 gap-1 mb-2">
-                                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                                    <div
-                                        key={i}
-                                        className="text-center text-xs font-semibold py-1"
-                                        style={{ color: 'var(--color-text-muted)' }}
-                                    >
-                                        {day}
-                                    </div>
-                                ))}
+                                {Array.from({ length: 7 }, (_, i) => {
+                                    const startDay = startOfWeek === 'monday' ? 1 : 0; // Mon=1, Sun=0 in js Date getDay() logic? No, JS: Sun=0, Mon=1. 
+                                    // If startOfWeek is monday, we want Mon, Tue...
+                                    // Mon is 1. Tue is 2.
+                                    // If startOfWeek is sunday, we want Sun, Mon...
+                                    // Sun is 0. Mon is 1.
+
+                                    // Using a fixed date to get locale string is safer.
+                                    // Jan 1 2023 = Sunday. Jan 2 2023 = Monday.
+                                    const baseDate = startOfWeek === 'monday' ? 2 : 1;
+                                    const d = new Date(2023, 0, i + baseDate);
+                                    return (
+                                        <div
+                                            key={i}
+                                            className="text-center text-xs font-semibold py-1"
+                                            style={{ color: 'var(--color-text-muted)' }}
+                                        >
+                                            {d.toLocaleDateString(language, { weekday: 'narrow' })}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Calendar Days */}
@@ -300,15 +322,19 @@ export default function DatePickerButton({ selectedDate, onDateChange, autoOpen 
 
                         {/* Day Headers */}
                         <div className="grid grid-cols-7 gap-1 mb-2">
-                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => (
-                                <div
-                                    key={i}
-                                    className="text-center text-xs font-semibold py-1"
-                                    style={{ color: 'var(--color-text-muted)' }}
-                                >
-                                    {day}
-                                </div>
-                            ))}
+                            {Array.from({ length: 7 }, (_, i) => {
+                                const baseDate = startOfWeek === 'monday' ? 2 : 1;
+                                const d = new Date(2023, 0, i + baseDate);
+                                return (
+                                    <div
+                                        key={i}
+                                        className="text-center text-xs font-semibold py-1"
+                                        style={{ color: 'var(--color-text-muted)' }}
+                                    >
+                                        {d.toLocaleDateString(language, { weekday: 'narrow' })}
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         {/* Calendar Days */}

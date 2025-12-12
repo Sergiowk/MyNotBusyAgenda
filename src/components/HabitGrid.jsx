@@ -1,22 +1,35 @@
 import React, { useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 import clsx from 'clsx';
 
 export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = 'month' }) {
     const { t } = useLanguage();
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
 
     const days = useMemo(() => {
         const d_arr = [];
         if (viewMode === 'week') {
             // Re-implementing correctly inside
             const curr = new Date(currentDate);
-            const first = curr.getDate() - curr.getDay() + (curr.getDay() === 0 ? -6 : 1);
-            const startOfWeek = new Date(curr);
-            startOfWeek.setDate(first);
+            const currentDay = curr.getDay(); // 0-6
+
+            let diff;
+            if (startOfWeek === 'monday') {
+                // Monday (1) - Sunday (0)
+                diff = curr.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
+            } else {
+                // Sunday (0) - Saturday (6)
+                diff = curr.getDate() - currentDay;
+            }
+
+            const startOfWeekDate = new Date(curr);
+            startOfWeekDate.setDate(diff);
 
             for (let i = 0; i < 7; i++) {
-                const d = new Date(startOfWeek);
-                d.setDate(startOfWeek.getDate() + i);
+                const d = new Date(startOfWeekDate);
+                d.setDate(startOfWeekDate.getDate() + i);
 
                 const yearStr = d.getFullYear();
                 const monthStr = String(d.getMonth() + 1).padStart(2, '0');

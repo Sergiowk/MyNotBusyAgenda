@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { X, Lock, Check, Moon, Sun } from 'lucide-react';
 import LanguageSelector from './LanguageSelector';
 
@@ -9,6 +10,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
     const { user, linkEmailPassword } = useAuth();
     const { t } = useLanguage();
     const { isDark, toggleDarkMode } = useTheme();
+    const { settings, updateSettings } = useSettings();
     const [password, setPassword] = useState('');
     const [status, setStatus] = useState({ type: '', message: '' });
     const [loading, setLoading] = useState(false);
@@ -101,8 +103,38 @@ export default function ProfileSettingsModal({ isOpen, onClose }) {
                                     )}
                                 </button>
                             </div>
+
+                            <div className="flex items-center justify-between">
+                                <span style={{ color: 'var(--color-text-primary)' }}>{t('profile.start_of_week') || 'Start of week'}</span>
+                                <div className="flex overflow-hidden rounded-lg border" style={{ borderColor: 'var(--color-border)' }}>
+                                    <button
+                                        onClick={() => updateSettings({ startOfWeek: 'monday' })}
+                                        className={`px-3 py-1.5 text-sm transition-colors ${settings?.startOfWeek === 'monday' ? 'font-medium' : 'opacity-60 hover:opacity-100'}`}
+                                        style={{
+                                            backgroundColor: settings?.startOfWeek === 'monday' ? 'var(--color-bg-secondary)' : 'transparent',
+                                            color: 'var(--color-text-primary)'
+                                        }}
+                                    >
+                                        {t('profile.monday') || 'Monday'}
+                                    </button>
+                                    <div className="w-[1px]" style={{ backgroundColor: 'var(--color-border)' }}></div>
+                                    <button
+                                        onClick={() => updateSettings({ startOfWeek: 'sunday' })}
+                                        className={`px-3 py-1.5 text-sm transition-colors ${settings?.startOfWeek === 'sunday' ? 'font-medium' : 'opacity-60 hover:opacity-100'}`}
+                                        style={{
+                                            backgroundColor: settings?.startOfWeek === 'sunday' ? 'var(--color-bg-secondary)' : 'transparent',
+                                            color: 'var(--color-text-primary)'
+                                        }}
+                                    >
+                                        {t('profile.sunday') || 'Sunday'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
+
+
 
                     <div className="mb-6">
                         <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>

@@ -57,6 +57,9 @@ export const translations = {
             theme_dark: "Dark",
             theme_light: "Light",
             version: "Version",
+            start_of_week: "Start of week",
+            monday: "Monday",
+            sunday: "Sunday"
         },
         dashboard: {
             greeting: {
@@ -208,6 +211,9 @@ export const translations = {
             theme_dark: "Oscuro",
             theme_light: "Claro",
             version: "Versión",
+            start_of_week: "Inicio de semana",
+            monday: "Lunes",
+            sunday: "Domingo"
         },
         dashboard: {
             greeting: {
@@ -356,6 +362,9 @@ export const translations = {
             theme_dark: "深色",
             theme_light: "浅色",
             version: "版本",
+            start_of_week: "每周开始于",
+            monday: "周一",
+            sunday: "周日"
         },
         dashboard: {
             greeting: {
