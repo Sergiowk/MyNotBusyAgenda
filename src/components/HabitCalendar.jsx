@@ -128,11 +128,20 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                         bgColor = 'var(--color-bg-hover)';
                     }
 
+                    // Check if day has passed
+                    const today = new Date();
+                    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                    const isPastDay = d.dateString < todayStr;
+
                     // Specific logic for limit habits? 
                     if (habit.type === 'limit' && isScheduled) {
-                        if (value > 0 && value <= target) bgColor = '#22c55e';
-                        else if (value > target) bgColor = '#ef4444';
-                        else bgColor = 'var(--color-bg-hover)';
+                        if (value > target) {
+                            bgColor = '#ef4444'; // Red (exceeded limit)
+                        } else if (isPastDay && value <= target) {
+                            bgColor = '#22c55e'; // Green (past day, stayed under limit or 0)
+                        } else {
+                            bgColor = 'var(--color-bg-hover)'; // Current/future day, blank
+                        }
                     }
 
                     const isToday = d.dateString === new Date().toISOString().split('T')[0];

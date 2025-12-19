@@ -91,21 +91,20 @@ export default function HabitMonthGrid({ habits, habitLogs, currentMonth }) {
                             const value = habitLogs[habit.id]?.[day.dateString] || 0;
                             const target = habit.target;
 
-                            // 3. Determine Color
-                            // Green: Met target (or met limit logic? Limit logic: < limit is good?)
-                            // Wait: Limit type logic: "Social Media < 30m"
-                            // If value <= target -> Green. If value > target -> Red.
-                            // BUT normally "Target" implies "Goal to reach". 
-                            // Let's assume standard logic first: >= Target is Green.
-                            // If type === 'limit': <= Target is Green currently?
-                            // Let's look at HabitItem logic:
-                            // if (type === 'limit') progressColor = current > target ? '#ef4444' : '#22c55e';
+                            // Check if day has passed
+                            const today = new Date();
+                            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                            const isPastDay = day.dateString < todayStr;
 
+                            // 3. Determine Color
                             let bgColor = 'transparent';
                             if (habit.type === 'limit') {
-                                if (value > 0 && value <= target) bgColor = '#22c55e'; // Green
-                                else if (value > target) bgColor = '#ef4444'; // Red
-                                else bgColor = 'transparent'; // No activity, so gray/transparent
+                                if (value > target) {
+                                    bgColor = '#ef4444'; // Red (exceeded limit)
+                                } else if (isPastDay && value <= target) {
+                                    bgColor = '#22c55e'; // Green (past day, stayed under limit or 0)
+                                }
+                                // else: current/future day with value <= target stays transparent
                             } else {
                                 if (value >= target) bgColor = '#22c55e'; // Green
                                 else if (value > 0) bgColor = '#eab308'; // Yellow

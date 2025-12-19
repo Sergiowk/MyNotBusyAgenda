@@ -161,11 +161,20 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
                             const value = habitLogs[habit.id]?.[day.dateString] || 0;
                             const target = habit.target;
 
+                            // Check if day has passed
+                            const today = new Date();
+                            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                            const isPastDay = day.dateString < todayStr;
+
                             let bgColor = viewMode === 'week' ? 'var(--color-bg-secondary)' : 'transparent';
 
                             if (habit.type === 'limit') {
-                                if (value > 0 && value <= target) bgColor = '#22c55e'; // Green
-                                else if (value > target) bgColor = '#ef4444'; // Red
+                                if (value > target) {
+                                    bgColor = '#ef4444'; // Red (exceeded limit)
+                                } else if (isPastDay && value <= target) {
+                                    bgColor = '#22c55e'; // Green (past day, stayed under limit or 0)
+                                }
+                                // else: current/future day with value <= target stays blank
                             } else {
                                 if (value >= target) bgColor = '#22c55e'; // Green
                                 else if (value > 0) bgColor = '#eab308'; // Yellow
