@@ -11,9 +11,9 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
-    "mobile": "npm run build && npx cap sync",
-    "android": "npm run build && npx cap sync android",
-    "ios": "npm run build && npx cap sync ios"
+    "mobile": "set VITE_BUILD_TARGET=capacitor&& npm run build && npx cap sync",
+    "android": "set VITE_BUILD_TARGET=capacitor&& npm run build && npx cap sync android",
+    "ios": "set VITE_BUILD_TARGET=capacitor&& npm run build && npx cap sync ios"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",

@@ -38,5 +38,6 @@ export default defineConfig({
       }
     })
   ],
-  base: "/MyNotBusyAgenda/",
+  // Use root path for Capacitor builds, GitHub Pages path for web builds
+  base: process.env.VITE_BUILD_TARGET === 'capacitor' ? '/' : '/MyNotBusyAgenda/',
 })
