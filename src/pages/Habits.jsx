@@ -22,17 +22,94 @@ export default function Habits() {
     const [selectedHabitId, setSelectedHabitId] = useState(null);
     const [monthViewType, setMonthViewType] = useState('single'); // 'single' | 'compact'
 
-    // Default to first habit when entering month view or when habits load
-    useEffect(() => {
-        if (habits.length > 0 && !selectedHabitId) {
-            setSelectedHabitId(habits[0].id);
+
+    // Get earliest habit creation date
+    const getEarliestHabitDate = () => {
+        if (habits.length === 0) return null;
+        const dates = habits.map(h => {
+            if (!h.createdAt) return new Date();
+            return h.createdAt.seconds ? new Date(h.createdAt.seconds * 1000) : new Date(h.createdAt);
+        });
+        return new Date(Math.min(...dates));
+    };
+
+    // Filter habits based on view and selected date
+    const getFilteredHabits = () => {
+        if (view === 'day') {
+            // Day view: only show habits created on or before selected date AND scheduled for that day
+            return habits.filter(habit => {
+                // Check creation date
+                if (habit.createdAt) {
+                    const createdDate = habit.createdAt.seconds
+                        ? new Date(habit.createdAt.seconds * 1000)
+                        : new Date(habit.createdAt);
+                    const createdDateStr = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
+                    const selectedDateStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+                    if (selectedDateStr < createdDateStr) return false;
+                }
+                // Check if scheduled for this day
+                if (!habit.frequency) return true;
+                const dayOfWeek = selectedDate.getDay();
+                return habit.frequency.includes(dayOfWeek);
+            });
+        } else if (view === 'week') {
+            // Week view: only show habits created on or before the week's end date
+            const curr = new Date(selectedDate);
+            const currentDay = curr.getDay();
+            const diff = curr.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
+            const endOfWeek = new Date(curr);
+            endOfWeek.setDate(diff + 6);
+            const endOfWeekStr = `${endOfWeek.getFullYear()}-${String(endOfWeek.getMonth() + 1).padStart(2, '0')}-${String(endOfWeek.getDate()).padStart(2, '0')}`;
+
+            return habits.filter(habit => {
+                if (!habit.createdAt) return true;
+                const createdDate = habit.createdAt.seconds
+                    ? new Date(habit.createdAt.seconds * 1000)
+                    : new Date(habit.createdAt);
+                const createdDateStr = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
+                return createdDateStr <= endOfWeekStr;
+            });
+        } else {
+            // Month view: only show habits created on or before the month's end date
+            const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+            const endOfMonthStr = `${endOfMonth.getFullYear()}-${String(endOfMonth.getMonth() + 1).padStart(2, '0')}-${String(endOfMonth.getDate()).padStart(2, '0')}`;
+
+            return habits.filter(habit => {
+                if (!habit.createdAt) return true;
+                const createdDate = habit.createdAt.seconds
+                    ? new Date(habit.createdAt.seconds * 1000)
+                    : new Date(habit.createdAt);
+                const createdDateStr = `${createdDate.getFullYear()}-${String(createdDate.getMonth() + 1).padStart(2, '0')}-${String(createdDate.getDate()).padStart(2, '0')}`;
+                return createdDateStr <= endOfMonthStr;
+            });
         }
-    }, [habits, selectedHabitId]);
+    };
+
+    const filteredHabits = getFilteredHabits();
+
+    // Default to first habit when entering month view or when habits load
+    // Also update if the selected habit is no longer in the filtered list
+    useEffect(() => {
+        if (filteredHabits.length > 0) {
+            if (!selectedHabitId || !filteredHabits.find(h => h.id === selectedHabitId)) {
+                setSelectedHabitId(filteredHabits[0].id);
+            }
+        }
+    }, [filteredHabits, selectedHabitId]);
 
     const handleDateChange = (amount) => {
         const newDate = new Date(selectedDate);
         if (view === 'month') {
             newDate.setMonth(newDate.getMonth() + amount);
+            // Prevent navigation to months before any habits existed
+            const earliestDate = getEarliestHabitDate();
+            if (earliestDate && amount < 0) {
+                const newMonthStart = new Date(newDate.getFullYear(), newDate.getMonth(), 1);
+                const earliestMonthStart = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
+                if (newMonthStart < earliestMonthStart) {
+                    return; // Don't allow navigation
+                }
+            }
         } else if (view === 'week') {
             newDate.setDate(newDate.getDate() + (amount * 7));
         } else {
@@ -198,7 +275,7 @@ export default function Habits() {
                                         color: 'var(--color-text-primary)'
                                     }}
                                 >
-                                    {habits.map(h => (
+                                    {filteredHabits.map(h => (
                                         <option key={h.id} value={h.id}>{h.name}</option>
                                     ))}
                                 </select>
@@ -212,34 +289,27 @@ export default function Habits() {
             <main>
                 {view === 'day' ? (
                     <div className="space-y-4">
-                        {habits.length === 0 ? (
+                        {filteredHabits.length === 0 ? (
                             <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
                                 <Activity className="mx-auto mb-3 opacity-50" size={48} />
                                 <p>{t('habits.empty') || "No habits yet. Create one to get started!"}</p>
                             </div>
                         ) : (
-                            habits
-                                .filter(habit => {
-                                    // Only show habits scheduled for this day in day view
-                                    if (!habit.frequency) return true; // Show all if no frequency set
-                                    const dayOfWeek = selectedDate.getDay(); // 0 (Sun) - 6 (Sat)
-                                    return habit.frequency.includes(dayOfWeek);
-                                })
-                                .map(habit => (
-                                    <HabitItem
-                                        key={habit.id}
-                                        habit={habit}
-                                        logValue={habitLogs[habit.id]?.[`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`]}
-                                        onLog={handleLogProgress}
-                                        onDelete={deleteHabit}
-                                        onEdit={openEditModal}
-                                    />
-                                ))
+                            filteredHabits.map(habit => (
+                                <HabitItem
+                                    key={habit.id}
+                                    habit={habit}
+                                    logValue={habitLogs[habit.id]?.[`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`]}
+                                    onLog={handleLogProgress}
+                                    onDelete={deleteHabit}
+                                    onEdit={openEditModal}
+                                />
+                            ))
                         )}
                     </div>
                 ) : view === 'week' ? (
                     <HabitGrid
-                        habits={habits}
+                        habits={filteredHabits}
                         habitLogs={habitLogs}
                         currentDate={selectedDate}
                         viewMode={view}
@@ -248,7 +318,7 @@ export default function Habits() {
                     // Month View
                     monthViewType === 'single' ? (
                         <HabitCalendar
-                            habit={habits.find(h => h.id === selectedHabitId)}
+                            habit={filteredHabits.find(h => h.id === selectedHabitId)}
                             habitLogs={habitLogs}
                             currentDate={selectedDate}
                             onMonthChange={handleDateChange}
@@ -256,7 +326,7 @@ export default function Habits() {
                     ) : (
                         // Compact Grid View
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            {habits.map(habit => (
+                            {filteredHabits.map(habit => (
                                 <HabitCalendar
                                     key={habit.id}
                                     habit={habit}

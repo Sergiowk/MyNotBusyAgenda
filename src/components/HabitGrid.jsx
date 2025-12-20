@@ -134,6 +134,16 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
                         </div>
 
                         {days.map(day => {
+                            // Check if day is before habit creation
+                            let isBeforeCreation = false;
+                            if (habit.createdAt) {
+                                const habitCreatedDate = habit.createdAt.seconds
+                                    ? new Date(habit.createdAt.seconds * 1000) // Firestore timestamp
+                                    : new Date(habit.createdAt); // Regular date
+                                const habitCreatedStr = `${habitCreatedDate.getFullYear()}-${String(habitCreatedDate.getMonth() + 1).padStart(2, '0')}-${String(habitCreatedDate.getDate()).padStart(2, '0')}`;
+                                isBeforeCreation = day.dateString < habitCreatedStr;
+                            }
+
                             const isScheduled = !habit.frequency || habit.frequency.includes(day.dayOfWeek);
 
                             // Style bases
@@ -144,7 +154,7 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
                                 // Let's adjust the wrapper in the next chunk, here just defining class.
                             );
 
-                            if (!isScheduled) {
+                            if (isBeforeCreation || !isScheduled) {
                                 return (
                                     <div
                                         key={day.dateString}
