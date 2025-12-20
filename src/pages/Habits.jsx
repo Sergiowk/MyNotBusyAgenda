@@ -218,16 +218,23 @@ export default function Habits() {
                                 <p>{t('habits.empty') || "No habits yet. Create one to get started!"}</p>
                             </div>
                         ) : (
-                            habits.map(habit => (
-                                <HabitItem
-                                    key={habit.id}
-                                    habit={habit}
-                                    logValue={habitLogs[habit.id]?.[`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`]}
-                                    onLog={handleLogProgress}
-                                    onDelete={deleteHabit}
-                                    onEdit={openEditModal}
-                                />
-                            ))
+                            habits
+                                .filter(habit => {
+                                    // Only show habits scheduled for this day in day view
+                                    if (!habit.frequency) return true; // Show all if no frequency set
+                                    const dayOfWeek = selectedDate.getDay(); // 0 (Sun) - 6 (Sat)
+                                    return habit.frequency.includes(dayOfWeek);
+                                })
+                                .map(habit => (
+                                    <HabitItem
+                                        key={habit.id}
+                                        habit={habit}
+                                        logValue={habitLogs[habit.id]?.[`${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`]}
+                                        onLog={handleLogProgress}
+                                        onDelete={deleteHabit}
+                                        onEdit={openEditModal}
+                                    />
+                                ))
                         )}
                     </div>
                 ) : view === 'week' ? (

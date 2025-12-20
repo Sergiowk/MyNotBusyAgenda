@@ -31,10 +31,6 @@ export function useHabits(date = null, viewMode = 'day') {
                     ...data,
                     name: decryptData(data.name, user.uid)
                 };
-            }).filter(habit => {
-                if (!date || !habit.frequency) return true; // Show all if no date or no frequency set
-                const dayOfWeek = date.getDay(); // 0 (Sun) - 6 (Sat)
-                return habit.frequency.includes(dayOfWeek);
             });
             setHabits(habitsData);
         });
