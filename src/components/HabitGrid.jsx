@@ -144,6 +144,16 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
                                 isBeforeCreation = day.dateString < habitCreatedStr;
                             }
 
+                            // Check if habit is paused on this day
+                            let isPausedOnDay = false;
+                            if (habit.paused && habit.pausedAt) {
+                                const pausedDate = habit.pausedAt.seconds
+                                    ? new Date(habit.pausedAt.seconds * 1000)
+                                    : new Date(habit.pausedAt);
+                                const pausedDateStr = `${pausedDate.getFullYear()}-${String(pausedDate.getMonth() + 1).padStart(2, '0')}-${String(pausedDate.getDate()).padStart(2, '0')}`;
+                                isPausedOnDay = day.dateString >= pausedDateStr;
+                            }
+
                             const isScheduled = !habit.frequency || habit.frequency.includes(day.dayOfWeek);
 
                             // Style bases
@@ -154,7 +164,7 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
                                 // Let's adjust the wrapper in the next chunk, here just defining class.
                             );
 
-                            if (isBeforeCreation || !isScheduled) {
+                            if (isBeforeCreation || !isScheduled || isPausedOnDay) {
                                 return (
                                     <div
                                         key={day.dateString}

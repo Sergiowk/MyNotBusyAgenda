@@ -189,5 +189,20 @@ export function useHabits(date = null, viewMode = 'day') {
         }
     }, [user]);
 
-    return { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress };
+    const togglePauseHabit = useCallback(async (id, isPaused) => {
+        if (!user) return;
+        try {
+            const habitRef = doc(db, 'users', user.uid, 'habits', id);
+            await updateDoc(habitRef, {
+                paused: !isPaused,
+                pausedAt: !isPaused ? new Date() : null,
+                updatedAt: new Date()
+            });
+        } catch (error) {
+            console.error('Error toggling pause habit:', error);
+            throw error;
+        }
+    }, [user]);
+
+    return { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress, togglePauseHabit };
 }

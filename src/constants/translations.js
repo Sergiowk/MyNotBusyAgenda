@@ -150,7 +150,9 @@ export const translations = {
             view_habit: "Habit Mode",
             view_compact: "Compact Mode",
             manual_entry: "Manual Entry",
-            manual_modal_title: "Add the units here"
+            manual_modal_title: "Add the units here",
+            pause: "Pause",
+            resume: "Resume"
         }
     },
     es: {
@@ -301,7 +303,9 @@ export const translations = {
             view_habit: "Modo Hábito",
             view_compact: "Modo Compacto",
             manual_entry: "Entrada Manual",
-            manual_modal_title: "Añade las unidades aquí"
+            manual_modal_title: "Añade las unidades aquí",
+            pause: "Pausar",
+            resume: "Reanudar"
         }
     },
     zh: {
@@ -451,7 +455,9 @@ export const translations = {
             view_habit: "习惯模式",
             view_compact: "紧凑模式",
             manual_entry: "手动输入",
-            manual_modal_title: "在此添加单位"
+            manual_modal_title: "在此添加单位",
+            pause: "暂停",
+            resume: "恢复"
         }
     },
     fr: {
@@ -598,7 +604,9 @@ export const translations = {
             view_habit: "Mode Habitude",
             view_compact: "Mode Compact",
             manual_entry: "Saisie Manuelle",
-            manual_modal_title: "Ajoutez les unités ici"
+            manual_modal_title: "Ajoutez les unités ici",
+            pause: "Pause",
+            resume: "Reprendre"
         }
     },
     de: {
@@ -745,7 +753,9 @@ export const translations = {
             view_habit: "Gewohnheitsmodus",
             view_compact: "Kompaktmodus",
             manual_entry: "Manuelle Eingabe",
-            manual_modal_title: "Einheiten hier hinzufügen"
+            manual_modal_title: "Einheiten hier hinzufügen",
+            pause: "Pausieren",
+            resume: "Fortsetzen"
         }
     }
 };

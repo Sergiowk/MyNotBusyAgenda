@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, Minus, Trash2, Edit2, MoreVertical, Pencil, Keyboard, RotateCcw } from 'lucide-react';
+import { Plus, Minus, Trash2, Edit2, MoreVertical, Pencil, Keyboard, RotateCcw, Pause, Play } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 import ManualLogModal from './ManualLogModal';
 import clsx from 'clsx';
 
-export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) {
+export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, onTogglePause }) {
     const { t } = useLanguage();
     const current = logValue || 0;
     const { name, target, unit, type } = habit;
@@ -67,7 +67,10 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
 
     return (
         <div
-            className="p-4 rounded-xl border mb-3 transition-all relative"
+            className={clsx(
+                "p-4 rounded-xl border mb-3 transition-all relative",
+                habit.paused && "opacity-60"
+            )}
             style={{
                 backgroundColor: 'var(--color-bg-card)',
                 borderColor: 'var(--color-border)',
@@ -127,6 +130,17 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
                             <button
                                 onClick={() => {
                                     setIsMenuOpen(false);
+                                    onTogglePause(habit.id, habit.paused);
+                                }}
+                                className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                style={{ color: 'var(--color-text-primary)' }}
+                            >
+                                {habit.paused ? <Play size={14} /> : <Pause size={14} />}
+                                {habit.paused ? (t('habits.resume') || 'Resume') : (t('habits.pause') || 'Pause')}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
                                     onDelete(habit.id);
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
@@ -153,11 +167,14 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
             {/* Controls - Split into two groups */}
             <div className="flex gap-2">
                 {/* Left: Quick Actions Group */}
-                <div className="bg-[var(--color-bg-secondary)] rounded-lg p-1 min-h-[40px] flex items-center gap-1 flex-1 justify-between px-2">
+                <div className={clsx(
+                    "bg-[var(--color-bg-secondary)] rounded-lg p-1 min-h-[40px] flex items-center gap-1 flex-1 justify-between px-2",
+                    habit.paused && "opacity-50 cursor-not-allowed"
+                )}>
                     <button
                         onClick={handleDecrement}
-                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors"
-                        disabled={current <= 0}
+                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                        disabled={current <= 0 || habit.paused}
                     >
                         <Minus size={16} />
                     </button>
@@ -168,7 +185,8 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
 
                     <button
                         onClick={handleIncrement}
-                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors"
+                        className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                        disabled={habit.paused}
                     >
                         <Plus size={16} />
                     </button>
@@ -177,8 +195,9 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit }) 
                 {/* Right: Manual Entry Button */}
                 <button
                     onClick={() => setIsManualModalOpen(true)}
-                    className="bg-[var(--color-bg-secondary)] rounded-lg px-3 min-h-[40px] flex items-center justify-center hover:bg-[var(--color-bg-primary)] transition-colors text-[var(--color-text-secondary)]"
+                    className="bg-[var(--color-bg-secondary)] rounded-lg px-3 min-h-[40px] flex items-center justify-center hover:bg-[var(--color-bg-primary)] transition-colors text-[var(--color-text-secondary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg-secondary)]"
                     title={t('habits.manual_entry') || "Manual Entry"}
+                    disabled={habit.paused}
                 >
                     <Keyboard size={18} />
                 </button>

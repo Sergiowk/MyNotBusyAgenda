@@ -16,7 +16,7 @@ export default function Habits() {
 
     // For now we default to today. Future: add date navigation.
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress } = useHabits(selectedDate, view);
+    const { habits, habitLogs, addHabit, updateHabit, deleteHabit, logHabitProgress, togglePauseHabit } = useHabits(selectedDate, view);
 
     // Month View Selection
     const [selectedHabitId, setSelectedHabitId] = useState(null);
@@ -303,6 +303,7 @@ export default function Habits() {
                                     onLog={handleLogProgress}
                                     onDelete={deleteHabit}
                                     onEdit={openEditModal}
+                                    onTogglePause={togglePauseHabit}
                                 />
                             ))
                         )}

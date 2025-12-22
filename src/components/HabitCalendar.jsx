@@ -110,6 +110,16 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                         isBeforeCreation = d.dateString < habitCreatedStr;
                     }
 
+                    // Check if habit is paused on this day
+                    let isPausedOnDay = false;
+                    if (habit.paused && habit.pausedAt) {
+                        const pausedDate = habit.pausedAt.seconds
+                            ? new Date(habit.pausedAt.seconds * 1000)
+                            : new Date(habit.pausedAt);
+                        const pausedDateStr = `${pausedDate.getFullYear()}-${String(pausedDate.getMonth() + 1).padStart(2, '0')}-${String(pausedDate.getDate()).padStart(2, '0')}`;
+                        isPausedOnDay = d.dateString >= pausedDateStr;
+                    }
+
                     // Logic
                     const isScheduled = !habit.frequency || habit.frequency.includes(d.dayOfWeek);
                     const value = habitLogs[habit.id]?.[d.dateString] || 0;
@@ -118,7 +128,7 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                     let bgColor = 'var(--color-bg-secondary)'; // Default empty
                     let content = null;
 
-                    if (isBeforeCreation || !isScheduled) {
+                    if (isBeforeCreation || !isScheduled || isPausedOnDay) {
                         // Crossed out (before creation or unscheduled)
                         bgColor = 'var(--color-bg-secondary)';
                         content = (
@@ -144,7 +154,7 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                     const isPastDay = d.dateString < todayStr;
 
                     // Specific logic for limit habits? 
-                    if (habit.type === 'limit' && isScheduled && !isBeforeCreation) {
+                    if (habit.type === 'limit' && isScheduled && !isBeforeCreation && !isPausedOnDay) {
                         if (value > target) {
                             bgColor = '#ef4444'; // Red (exceeded limit)
                         } else if (isPastDay && value <= target) {
@@ -170,7 +180,7 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                             )}
                             style={{
                                 backgroundColor: bgColor,
-                                color: (value > 0 && isScheduled && !isBeforeCreation) ? '#fff' : 'var(--color-text-primary)'
+                                color: (value > 0 && isScheduled && !isBeforeCreation && !isPausedOnDay) ? '#fff' : 'var(--color-text-primary)'
                             }}
                             title={`${d.dateString}: ${value}`}
                         >
