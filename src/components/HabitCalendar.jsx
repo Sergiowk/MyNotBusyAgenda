@@ -112,12 +112,26 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
 
                     // Check if habit is paused on this day
                     let isPausedOnDay = false;
+
+                    // Simple check for currently paused
                     if (habit.paused && habit.pausedAt) {
                         const pausedDate = habit.pausedAt.seconds
                             ? new Date(habit.pausedAt.seconds * 1000)
                             : new Date(habit.pausedAt);
                         const pausedDateStr = `${pausedDate.getFullYear()}-${String(pausedDate.getMonth() + 1).padStart(2, '0')}-${String(pausedDate.getDate()).padStart(2, '0')}`;
-                        isPausedOnDay = d.dateString >= pausedDateStr;
+                        if (d.dateString >= pausedDateStr) isPausedOnDay = true;
+                    }
+
+                    // Check historical intervals
+                    if (!isPausedOnDay && habit.pauseIntervals) {
+                        isPausedOnDay = habit.pauseIntervals.some(interval => {
+                            if (d.dateString >= interval.start) {
+                                if (interval.end === null || d.dateString < interval.end) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
                     }
 
                     // Logic
@@ -153,8 +167,9 @@ export default function HabitCalendar({ habit, habitLogs, currentDate, onMonthCh
                     const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                     const isPastDay = d.dateString < todayStr;
 
-                    // Specific logic for limit habits? 
-                    if (habit.type === 'limit' && isScheduled && !isBeforeCreation && !isPausedOnDay) {
+                    // Specific logic for limit/quit habits
+                    const isQuit = habit.category === 'quit' || habit.type === 'limit';
+                    if (isQuit && isScheduled && !isBeforeCreation && !isPausedOnDay) {
                         if (value > target) {
                             bgColor = '#ef4444'; // Red (exceeded limit)
                         } else if (isPastDay && value <= target) {

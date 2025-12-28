@@ -60,8 +60,8 @@ const TaskItem = memo(({ todo, toggleTodo, startEditing, editingTaskId, editText
     return (
         <div
             className={clsx(
-                "group flex items-center justify-between rounded-xl border shadow-sm transition-all hover:shadow-md",
-                todo.completed && "opacity-75",
+                "group flex items-center justify-between rounded-xl border shadow-sm transition-all hover:shadow-md relative",
+                isMenuOpen && "z-50",
                 isOverdue ? "p-5" : "p-4"
             )}
             style={{
@@ -70,7 +70,7 @@ const TaskItem = memo(({ todo, toggleTodo, startEditing, editingTaskId, editText
                 touchAction: 'none'
             }}
         >
-            <div className="flex items-start gap-3 flex-1 text-left min-w-0">
+            <div className={clsx("flex items-start gap-3 flex-1 text-left min-w-0", todo.completed && "opacity-75")}>
                 <div onPointerDown={(e) => e.stopPropagation()}>
                     <button
                         onClick={() => toggleTodo(todo.id, todo.completed)}
@@ -109,7 +109,7 @@ const TaskItem = memo(({ todo, toggleTodo, startEditing, editingTaskId, editText
                             className="text-left w-full"
                         >
                             <span
-                                className={clsx("text-lg transition-all block", todo.completed && "line-through")}
+                                className={clsx("text-lg transition-all block", todo.completed && "line-through opacity-50 font-light")}
                                 style={{
                                     color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
                                     wordWrap: 'break-word',

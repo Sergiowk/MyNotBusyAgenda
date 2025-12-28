@@ -152,7 +152,14 @@ export const translations = {
             manual_entry: "Manual Entry",
             manual_modal_title: "Add the units here",
             pause: "Pause",
-            resume: "Resume"
+            resume: "Resume",
+            category_label: "Goal Type",
+            category_habit: "Habit",
+            category_quit: "Quit",
+            unit_hours: "hours",
+            unit_minutes: "minutes",
+            unit_seconds: "seconds",
+            unit_times: "times"
         }
     },
     es: {
@@ -305,7 +312,14 @@ export const translations = {
             manual_entry: "Entrada Manual",
             manual_modal_title: "Añade las unidades aquí",
             pause: "Pausar",
-            resume: "Reanudar"
+            resume: "Reanudar",
+            category_label: "Tipo de Objetivo",
+            category_habit: "Hábito",
+            category_quit: "Dejar",
+            unit_hours: "horas",
+            unit_minutes: "minutos",
+            unit_seconds: "segundos",
+            unit_times: "veces"
         }
     },
     zh: {

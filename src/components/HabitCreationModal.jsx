@@ -6,9 +6,10 @@ import clsx from 'clsx';
 export default function HabitCreationModal({ isOpen, onClose, onSave, initialData = null }) {
     const { t } = useLanguage();
     const [name, setName] = useState('');
-    const [type, setType] = useState('count'); // count, time, limit
+    const [category, setCategory] = useState('habit'); // habit, quit
+    const [type, setType] = useState('count'); // count, time
     const [target, setTarget] = useState(1);
-    const [unit, setUnit] = useState('');
+    const [unit, setUnit] = useState('times');
     const [frequency, setFrequency] = useState([0, 1, 2, 3, 4, 5, 6]); // All days selected by default
     const [loading, setLoading] = useState(false);
 
@@ -16,16 +17,18 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
         if (isOpen) {
             if (initialData) {
                 setName(initialData.name);
+                setCategory(initialData.category || 'habit');
                 setType(initialData.type);
                 setTarget(initialData.target);
-                setUnit(initialData.unit || '');
+                setUnit(initialData.unit || (initialData.type === 'count' ? 'times' : 'minutes'));
                 setFrequency(initialData.frequency || [0, 1, 2, 3, 4, 5, 6]);
             } else {
                 // Reset for new creation
                 setName('');
+                setCategory('habit');
                 setType('count');
                 setTarget(1);
-                setUnit('');
+                setUnit('times');
                 setFrequency([0, 1, 2, 3, 4, 5, 6]);
             }
         }
@@ -42,6 +45,7 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
             await onSave({
                 id: initialData?.id, // Pass ID if editing
                 name: name.trim(),
+                category,
                 type,
                 target: Number(target),
                 unit: unit.trim(),
@@ -80,8 +84,19 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
         switch (t) {
             case 'count': return <Activity size={18} />;
             case 'time': return <Clock size={18} />;
-            case 'limit': return <Ban size={18} />;
             default: return <Activity size={18} />;
+        }
+    };
+
+    const handleTypeChange = (newType) => {
+        setType(newType);
+        if (newType === 'count') {
+            setUnit('times');
+        } else if (newType === 'time') {
+            // Default to minutes if switching to time
+            if (!['hours', 'minutes', 'seconds'].includes(unit)) {
+                setUnit('minutes');
+            }
         }
     };
 
@@ -150,20 +165,42 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
                             </div>
                         </div>
 
+                        {/* Category Toggle (Habit or Quit) */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.category_label') || 'Goal Type'}
+                            </label>
+                            <div className="flex p-1 rounded-xl bg-[var(--color-bg-secondary)] border" style={{ borderColor: 'var(--color-border)' }}>
+                                {['habit', 'quit'].map((cat) => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => setCategory(cat)}
+                                        className={clsx(
+                                            "flex-1 py-1.5 rounded-lg text-sm font-medium transition-all capitalize",
+                                            category === cat ? "bg-[var(--color-bg-card)] shadow-sm text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] hover:opacity-70"
+                                        )}
+                                    >
+                                        {t(`habits.category_${cat}`) || cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Type Selection */}
                         <div>
                             <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                                 {t('habits.type_label') || 'Type'}
                             </label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {['count', 'time', 'limit'].map((typeOption) => (
+                            <div className="grid grid-cols-2 gap-2">
+                                {['count', 'time'].map((typeOption) => (
                                     <button
                                         key={typeOption}
                                         type="button"
-                                        onClick={() => setType(typeOption)}
+                                        onClick={() => handleTypeChange(typeOption)}
                                         className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all ${type === typeOption
-                                                ? 'bg-[var(--color-accent)] text-white border-transparent'
-                                                : 'bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)]'
+                                            ? 'bg-[var(--color-accent)] text-white border-transparent'
+                                            : 'bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)]'
                                             }`}
                                         style={type !== typeOption ? { borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' } : {}}
                                     >
@@ -189,19 +226,23 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
                                     style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
                                 />
                             </div>
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
-                                    {t('habits.unit_label') || 'Unit (Optional)'}
-                                </label>
-                                <input
-                                    type="text"
-                                    value={unit}
-                                    onChange={(e) => setUnit(e.target.value)}
-                                    placeholder={t('habits.unit_placeholder') || (type === 'time' ? 'minutes' : 'times')}
-                                    className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
-                                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
-                                />
-                            </div>
+                            {type === 'time' && (
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                        {t('habits.unit_label') || 'Unit'}
+                                    </label>
+                                    <select
+                                        value={unit}
+                                        onChange={(e) => setUnit(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none cursor-pointer"
+                                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                                    >
+                                        <option value="hours">{t('habits.unit_hours') || 'hours'}</option>
+                                        <option value="minutes">{t('habits.unit_minutes') || 'minutes'}</option>
+                                        <option value="seconds">{t('habits.unit_seconds') || 'seconds'}</option>
+                                    </select>
+                                </div>
+                            )}
                         </div>
 
                         <button

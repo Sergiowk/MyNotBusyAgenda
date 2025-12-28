@@ -68,8 +68,29 @@ export default function HabitMonthGrid({ habits, habitLogs, currentMonth }) {
                             // 1. Check if scheduled
                             const isScheduled = !habit.frequency || habit.frequency.includes(day.dayOfWeek);
 
+                            // 1b. Check if paused
+                            let isPausedOnDay = false;
+                            if (habit.paused && habit.pausedAt) {
+                                const pausedDate = habit.pausedAt.seconds
+                                    ? new Date(habit.pausedAt.seconds * 1000)
+                                    : new Date(habit.pausedAt);
+                                const pausedDateStr = `${pausedDate.getFullYear()}-${String(pausedDate.getMonth() + 1).padStart(2, '0')}-${String(pausedDate.getDate()).padStart(2, '0')}`;
+                                if (day.dateString >= pausedDateStr) isPausedOnDay = true;
+                            }
+
+                            if (!isPausedOnDay && habit.pauseIntervals) {
+                                isPausedOnDay = habit.pauseIntervals.some(interval => {
+                                    if (day.dateString >= interval.start) {
+                                        if (interval.end === null || day.dateString < interval.end) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                });
+                            }
+
                             // 2. Determine cell content
-                            if (!isScheduled) {
+                            if (!isScheduled || isPausedOnDay) {
                                 return (
                                     <div
                                         key={day.dateString}

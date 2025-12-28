@@ -303,7 +303,8 @@ export default function Habits() {
                                     onLog={handleLogProgress}
                                     onDelete={deleteHabit}
                                     onEdit={openEditModal}
-                                    onTogglePause={togglePauseHabit}
+                                    onTogglePause={(id, isPaused) => togglePauseHabit(id, isPaused, selectedDate)}
+                                    viewDate={selectedDate}
                                 />
                             ))
                         )}

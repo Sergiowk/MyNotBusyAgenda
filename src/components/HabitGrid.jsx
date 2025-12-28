@@ -146,12 +146,24 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
 
                             // Check if habit is paused on this day
                             let isPausedOnDay = false;
+
                             if (habit.paused && habit.pausedAt) {
                                 const pausedDate = habit.pausedAt.seconds
                                     ? new Date(habit.pausedAt.seconds * 1000)
                                     : new Date(habit.pausedAt);
                                 const pausedDateStr = `${pausedDate.getFullYear()}-${String(pausedDate.getMonth() + 1).padStart(2, '0')}-${String(pausedDate.getDate()).padStart(2, '0')}`;
-                                isPausedOnDay = day.dateString >= pausedDateStr;
+                                if (day.dateString >= pausedDateStr) isPausedOnDay = true;
+                            }
+
+                            if (!isPausedOnDay && habit.pauseIntervals) {
+                                isPausedOnDay = habit.pauseIntervals.some(interval => {
+                                    if (day.dateString >= interval.start) {
+                                        if (interval.end === null || day.dateString < interval.end) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                });
                             }
 
                             const isScheduled = !habit.frequency || habit.frequency.includes(day.dayOfWeek);
@@ -188,7 +200,8 @@ export default function HabitGrid({ habits, habitLogs, currentDate, viewMode = '
 
                             let bgColor = viewMode === 'week' ? 'var(--color-bg-secondary)' : 'transparent';
 
-                            if (habit.type === 'limit') {
+                            const isQuit = habit.category === 'quit' || habit.type === 'limit';
+                            if (isQuit) {
                                 if (value > target) {
                                     bgColor = '#ef4444'; // Red (exceeded limit)
                                 } else if (isPastDay && value <= target) {

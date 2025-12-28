@@ -189,15 +189,54 @@ export function useHabits(date = null, viewMode = 'day') {
         }
     }, [user]);
 
-    const togglePauseHabit = useCallback(async (id, isPaused) => {
+    const togglePauseHabit = useCallback(async (id, isCurrentlyPaused, dateObj = new Date()) => {
         if (!user) return;
         try {
+            const formatDate = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+            const dateStr = formatDate(dateObj);
             const habitRef = doc(db, 'users', user.uid, 'habits', id);
-            await updateDoc(habitRef, {
-                paused: !isPaused,
-                pausedAt: !isPaused ? new Date() : null,
-                updatedAt: new Date()
-            });
+
+            // Get current habit data to update pauseIntervals
+            const habitSnap = await getDocs(query(collection(db, 'users', user.uid, 'habits'), where('__name__', '==', id)));
+            const habitData = habitSnap.docs[0].data();
+            let pauseIntervals = habitData.pauseIntervals || [];
+
+            if (!isCurrentlyPaused) {
+                // Pausing: Add new interval
+                pauseIntervals.push({ start: dateStr, end: null });
+                await updateDoc(habitRef, {
+                    paused: true,
+                    pausedAt: new Date(),
+                    pauseIntervals,
+                    updatedAt: new Date()
+                });
+            } else {
+                // Resuming: Close the open interval
+                pauseIntervals = pauseIntervals.map(interval => {
+                    if (interval.end === null) {
+                        return { ...interval, end: dateStr };
+                    }
+                    return interval;
+                });
+
+                // Remove intervals where end <= start (invalid or immediate resume)
+                pauseIntervals = pauseIntervals.filter(interval => {
+                    if (interval.end !== null && interval.end <= interval.start) return false;
+                    return true;
+                });
+
+                await updateDoc(habitRef, {
+                    paused: false,
+                    pausedAt: null,
+                    pauseIntervals,
+                    updatedAt: new Date()
+                });
+            }
         } catch (error) {
             console.error('Error toggling pause habit:', error);
             throw error;

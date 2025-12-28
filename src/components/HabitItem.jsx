@@ -4,10 +4,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 import ManualLogModal from './ManualLogModal';
 import clsx from 'clsx';
 
-export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, onTogglePause }) {
+export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, onTogglePause, viewDate }) {
     const { t } = useLanguage();
     const current = logValue || 0;
-    const { name, target, unit, type } = habit;
+    const { name, target, unit, type, category } = habit;
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef(null);
     const [menuPosition, setMenuPosition] = useState('bottom');
@@ -25,6 +25,38 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
             return () => document.removeEventListener('mousedown', handleClickOutside);
         }
     }, [isMenuOpen]);
+
+    const checkPausedOnDate = (date) => {
+        if (!date) return false;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
+
+        // Check if currently paused and if it applies to this date
+        if (habit.paused && habit.pausedAt) {
+            const pausedAtDate = habit.pausedAt.seconds
+                ? new Date(habit.pausedAt.seconds * 1000)
+                : new Date(habit.pausedAt);
+            const pausedAtStr = `${pausedAtDate.getFullYear()}-${String(pausedAtDate.getMonth() + 1).padStart(2, '0')}-${String(pausedAtDate.getDate()).padStart(2, '0')}`;
+            if (dateStr >= pausedAtStr) return true;
+        }
+
+        // Check historical intervals
+        if (habit.pauseIntervals) {
+            return habit.pauseIntervals.some(interval => {
+                if (dateStr >= interval.start) {
+                    if (interval.end === null || dateStr < interval.end) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        }
+        return false;
+    };
+
+    const isPausedToday = checkPausedOnDate(viewDate || new Date());
 
     const toggleMenu = () => {
         if (!isMenuOpen) {
@@ -45,7 +77,9 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
     // Count/Time: Green when reached target.
     // Limit: Green while under target, Red when exceeded.
     let progressColor = 'var(--color-accent)';
-    if (type === 'limit') {
+    const isQuit = category === 'quit' || type === 'limit';
+
+    if (isQuit) {
         progressColor = current > target ? '#ef4444' : '#22c55e'; // Red if over, Green if under
     } else {
         progressColor = current >= target ? '#22c55e' : 'var(--color-accent)';
@@ -69,7 +103,8 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
         <div
             className={clsx(
                 "p-4 rounded-xl border mb-3 transition-all relative",
-                habit.paused && "opacity-60"
+                isPausedToday && "is-paused",
+                isMenuOpen && "z-50"
             )}
             style={{
                 backgroundColor: 'var(--color-bg-card)',
@@ -80,7 +115,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
             <div className="flex justify-between items-start mb-2">
                 <div>
                     <h3 className="font-medium text-lg">{name}</h3>
-                    <div className="text-sm opacity-70">
+                    <div className={clsx("text-sm opacity-70", isPausedToday && "opacity-40")}>
                         {current} / {target} {unit || (type === 'time' ? 'min' : '')}
                     </div>
                 </div>
@@ -154,7 +189,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
             </div>
 
             {/* Progress Bar */}
-            <div className="w-full h-3 bg-[var(--color-bg-secondary)] rounded-full overflow-hidden mb-3">
+            <div className={clsx("w-full h-3 bg-[var(--color-bg-secondary)] rounded-full overflow-hidden mb-3", isPausedToday && "opacity-40 blur-[1px]")}>
                 <div
                     className="h-full transition-all duration-500 ease-out"
                     style={{
@@ -168,13 +203,13 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
             <div className="flex gap-2">
                 {/* Left: Quick Actions Group */}
                 <div className={clsx(
-                    "bg-[var(--color-bg-secondary)] rounded-lg p-1 min-h-[40px] flex items-center gap-1 flex-1 justify-between px-2",
-                    habit.paused && "opacity-50 cursor-not-allowed"
+                    "bg-[var(--color-bg-secondary)] rounded-lg p-1 min-h-[40px] flex items-center gap-1 flex-1 justify-between px-2 transition-all",
+                    isPausedToday && "opacity-40 blur-[1px] cursor-not-allowed"
                 )}>
                     <button
                         onClick={handleDecrement}
                         className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                        disabled={current <= 0 || habit.paused}
+                        disabled={current <= 0 || isPausedToday}
                     >
                         <Minus size={16} />
                     </button>
@@ -186,7 +221,7 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
                     <button
                         onClick={handleIncrement}
                         className="p-1.5 rounded-md hover:bg-[var(--color-bg-primary)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-                        disabled={habit.paused}
+                        disabled={isPausedToday}
                     >
                         <Plus size={16} />
                     </button>
@@ -195,9 +230,9 @@ export default function HabitItem({ habit, logValue, onLog, onDelete, onEdit, on
                 {/* Right: Manual Entry Button */}
                 <button
                     onClick={() => setIsManualModalOpen(true)}
-                    className="bg-[var(--color-bg-secondary)] rounded-lg px-3 min-h-[40px] flex items-center justify-center hover:bg-[var(--color-bg-primary)] transition-colors text-[var(--color-text-secondary)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg-secondary)]"
+                    className="bg-[var(--color-bg-secondary)] rounded-lg px-3 min-h-[40px] flex items-center justify-center hover:bg-[var(--color-bg-primary)] transition-colors text-[var(--color-text-secondary)] disabled:opacity-40 disabled:blur-[1px] disabled:cursor-not-allowed disabled:hover:bg-[var(--color-bg-secondary)]"
                     title={t('habits.manual_entry') || "Manual Entry"}
-                    disabled={habit.paused}
+                    disabled={isPausedToday}
                 >
                     <Keyboard size={18} />
                 </button>
