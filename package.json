@@ -16,6 +16,7 @@
     "ios": "set VITE_BUILD_TARGET=capacitor&& npm run build && npx cap sync ios"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^8.0.1",
     "@capacitor/android": "^8.0.0",
     "@capacitor/cli": "^8.0.0",
     "@capacitor/core": "^8.0.0",

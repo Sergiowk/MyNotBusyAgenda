@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged, signInWithEmailAndPassword, linkWithCredential, EmailAuthProvider, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 
 const AuthContext = createContext();
 
@@ -23,7 +25,13 @@ export function AuthProvider({ children }) {
 
     const signInWithGoogle = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            if (Capacitor.isNativePlatform()) {
+                const result = await FirebaseAuthentication.signInWithGoogle();
+                const credential = GoogleAuthProvider.credential(result.credential.idToken);
+                await signInWithCredential(auth, credential);
+            } else {
+                await signInWithPopup(auth, googleProvider);
+            }
         } catch (error) {
             console.error('Error signing in with Google:', error);
             throw error;
@@ -32,6 +40,9 @@ export function AuthProvider({ children }) {
 
     const logout = async () => {
         try {
+            if (Capacitor.isNativePlatform()) {
+                await FirebaseAuthentication.signOut();
+            }
             await signOut(auth);
         } catch (error) {
             console.error('Error signing out:', error);
