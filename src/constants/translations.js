@@ -471,7 +471,14 @@ export const translations = {
             manual_entry: "手动输入",
             manual_modal_title: "在此添加单位",
             pause: "暂停",
-            resume: "恢复"
+            resume: "恢复",
+            category_label: "目标类型",
+            category_habit: "习惯",
+            category_quit: "戒除",
+            unit_hours: "小时",
+            unit_minutes: "分钟",
+            unit_seconds: "秒",
+            unit_times: "次"
         }
     },
     fr: {
@@ -620,7 +627,14 @@ export const translations = {
             manual_entry: "Saisie Manuelle",
             manual_modal_title: "Ajoutez les unités ici",
             pause: "Pause",
-            resume: "Reprendre"
+            resume: "Reprendre",
+            category_label: "Type d'objectif",
+            category_habit: "Habitude",
+            category_quit: "Arrêter",
+            unit_hours: "heures",
+            unit_minutes: "minutes",
+            unit_seconds: "secondes",
+            unit_times: "fois"
         }
     },
     de: {
@@ -769,7 +783,14 @@ export const translations = {
             manual_entry: "Manuelle Eingabe",
             manual_modal_title: "Einheiten hier hinzufügen",
             pause: "Pausieren",
-            resume: "Fortsetzen"
+            resume: "Fortsetzen",
+            category_label: "Zieltyp",
+            category_habit: "Gewohnheit",
+            category_quit: "Aufhören",
+            unit_hours: "Stunden",
+            unit_minutes: "Minuten",
+            unit_seconds: "Sekunden",
+            unit_times: "Mal"
         }
     }
 };

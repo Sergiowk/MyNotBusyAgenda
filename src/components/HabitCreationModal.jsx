@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { X, Check, Activity, Clock, Ban } from 'lucide-react';
 import clsx from 'clsx';
 
 export default function HabitCreationModal({ isOpen, onClose, onSave, initialData = null }) {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
+
     const [name, setName] = useState('');
     const [category, setCategory] = useState('habit'); // habit, quit
     const [type, setType] = useState('count'); // count, time
@@ -70,15 +74,18 @@ export default function HabitCreationModal({ isOpen, onClose, onSave, initialDat
         });
     };
 
-    const days = [
-        { key: 0, label: 'S' }, // JS getDay(): 0=Sun
-        { key: 1, label: 'M' },
-        { key: 2, label: 'T' },
-        { key: 3, label: 'W' },
-        { key: 4, label: 'T' },
-        { key: 5, label: 'F' },
-        { key: 6, label: 'S' }
-    ];
+    const baseDays = Array.from({ length: 7 }, (_, i) => {
+        // 2024-01-07 is Sunday
+        const d = new Date(2024, 0, 7 + i);
+        return {
+            key: i,
+            label: new Intl.DateTimeFormat(language || 'en', { weekday: 'narrow' }).format(d).toUpperCase()
+        };
+    });
+
+    const days = startOfWeek === 'monday'
+        ? [...baseDays.slice(1), baseDays[0]] // Monday first
+        : baseDays; // Sunday first (default JS order)
 
     const getTypeIcon = (t) => {
         switch (t) {
