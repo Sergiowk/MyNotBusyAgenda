@@ -1,0 +1,273 @@
+import { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { X, Check, Activity, Clock, Ban } from 'lucide-react';
+import clsx from 'clsx';
+
+export default function HabitCreationModal({ isOpen, onClose, onSave, initialData = null }) {
+    const { t, language } = useLanguage();
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
+
+    const [name, setName] = useState('');
+    const [category, setCategory] = useState('habit'); // habit, quit
+    const [type, setType] = useState('count'); // count, time
+    const [target, setTarget] = useState(1);
+    const [unit, setUnit] = useState('times');
+    const [frequency, setFrequency] = useState([0, 1, 2, 3, 4, 5, 6]); // All days selected by default
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            if (initialData) {
+                setName(initialData.name);
+                setCategory(initialData.category || 'habit');
+                setType(initialData.type);
+                setTarget(initialData.target);
+                setUnit(initialData.unit || (initialData.type === 'count' ? 'times' : 'minutes'));
+                setFrequency(initialData.frequency || [0, 1, 2, 3, 4, 5, 6]);
+            } else {
+                // Reset for new creation
+                setName('');
+                setCategory('habit');
+                setType('count');
+                setTarget(1);
+                setUnit('times');
+                setFrequency([0, 1, 2, 3, 4, 5, 6]);
+            }
+        }
+    }, [isOpen, initialData]);
+
+    if (!isOpen) return null;
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!name.trim()) return;
+
+        setLoading(true);
+        try {
+            await onSave({
+                id: initialData?.id, // Pass ID if editing
+                name: name.trim(),
+                category,
+                type,
+                target: Number(target),
+                unit: unit.trim(),
+                frequency
+            });
+            onClose();
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleDay = (dayIndex) => {
+        setFrequency(prev => {
+            if (prev.includes(dayIndex)) {
+                // Don't allow empty frequency? Or maybe allow it (habit paused)
+                return prev.filter(d => d !== dayIndex);
+            } else {
+                return [...prev, dayIndex].sort();
+            }
+        });
+    };
+
+    const baseDays = Array.from({ length: 7 }, (_, i) => {
+        // 2024-01-07 is Sunday
+        const d = new Date(2024, 0, 7 + i);
+        return {
+            key: i,
+            label: new Intl.DateTimeFormat(language || 'en', { weekday: 'narrow' }).format(d).toUpperCase()
+        };
+    });
+
+    const days = startOfWeek === 'monday'
+        ? [...baseDays.slice(1), baseDays[0]] // Monday first
+        : baseDays; // Sunday first (default JS order)
+
+    const getTypeIcon = (t) => {
+        switch (t) {
+            case 'count': return <Activity size={18} />;
+            case 'time': return <Clock size={18} />;
+            default: return <Activity size={18} />;
+        }
+    };
+
+    const handleTypeChange = (newType) => {
+        setType(newType);
+        if (newType === 'count') {
+            setUnit('times');
+        } else if (newType === 'time') {
+            // Default to minutes if switching to time
+            if (!['hours', 'minutes', 'seconds'].includes(unit)) {
+                setUnit('minutes');
+            }
+        }
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div
+                className="w-full max-w-md rounded-2xl border shadow-xl animate-in fade-in zoom-in duration-200"
+                style={{
+                    backgroundColor: 'var(--color-bg-card)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                }}
+            >
+                <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
+                    <h2 className="text-xl font-semibold">
+                        {initialData ? (t('habits.edit_habit') || 'Edit Habit') : (t('habits.create_new') || 'New Habit')}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 rounded-full hover:bg-[var(--color-bg-secondary)] transition-colors"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+
+                <div className="p-6">
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Name Input */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.name_label') || 'Habit Name'}
+                            </label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder={t('habits.name_placeholder') || 'e.g., Drink Water'}
+                                required
+                                className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                            />
+                        </div>
+
+                        {/* Frequency Selector */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.frequency_label') || 'Frequency'}
+                            </label>
+                            <div className="flex justify-between gap-1">
+                                {days.map((day) => (
+                                    <button
+                                        key={day.key}
+                                        type="button"
+                                        onClick={() => toggleDay(day.key)}
+                                        className={clsx(
+                                            "w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all",
+                                            frequency.includes(day.key)
+                                                ? "bg-[var(--color-accent)] text-white shadow-sm"
+                                                : "bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-primary)]"
+                                        )}
+                                        style={!frequency.includes(day.key) ? { borderColor: 'var(--color-border)', border: '1px solid' } : {}}
+                                    >
+                                        {day.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Category Toggle (Habit or Quit) */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.category_label') || 'Goal Type'}
+                            </label>
+                            <div className="flex p-1 rounded-xl bg-[var(--color-bg-secondary)] border" style={{ borderColor: 'var(--color-border)' }}>
+                                {['habit', 'quit'].map((cat) => (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => setCategory(cat)}
+                                        className={clsx(
+                                            "flex-1 py-1.5 rounded-lg text-sm font-medium transition-all capitalize",
+                                            category === cat ? "bg-[var(--color-bg-card)] shadow-sm text-[var(--color-text-primary)]" : "text-[var(--color-text-secondary)] hover:opacity-70"
+                                        )}
+                                    >
+                                        {t(`habits.category_${cat}`) || cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Type Selection */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                                {t('habits.type_label') || 'Type'}
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['count', 'time'].map((typeOption) => (
+                                    <button
+                                        key={typeOption}
+                                        type="button"
+                                        onClick={() => handleTypeChange(typeOption)}
+                                        className={`flex flex-col items-center justify-center p-3 rounded-lg border transition-all ${type === typeOption
+                                            ? 'bg-[var(--color-accent)] text-white border-transparent'
+                                            : 'bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-primary)]'
+                                            }`}
+                                        style={type !== typeOption ? { borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' } : {}}
+                                    >
+                                        {getTypeIcon(typeOption)}
+                                        <span className="text-xs mt-1 capitalize">{t(`habits.type_${typeOption}`) || typeOption}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Target & Unit */}
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                    {t('habits.target_label') || 'Target'}
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={target}
+                                    onChange={(e) => setTarget(e.target.value)}
+                                    className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
+                                    style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                                />
+                            </div>
+                            {type === 'time' && (
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                                        {t('habits.unit_label') || 'Unit'}
+                                    </label>
+                                    <select
+                                        value={unit}
+                                        onChange={(e) => setUnit(e.target.value)}
+                                        className="w-full px-4 py-2 rounded-lg border bg-[var(--color-bg-secondary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] appearance-none cursor-pointer"
+                                        style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-primary)' }}
+                                    >
+                                        <option value="hours">{t('habits.unit_hours') || 'hours'}</option>
+                                        <option value="minutes">{t('habits.unit_minutes') || 'minutes'}</option>
+                                        <option value="seconds">{t('habits.unit_seconds') || 'seconds'}</option>
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={loading || !name.trim()}
+                            className="w-full mt-4 py-2 px-4 rounded-lg font-medium transition-all hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: 'var(--color-accent)', color: '#ffffff' }}
+                        >
+                            {loading ? (t('common.saving') || 'Saving...') : (
+                                <>
+                                    <Check size={18} />
+                                    {initialData ? (t('common.save') || 'Save') : (t('habits.create_button') || 'Create Habit')}
+                                </>
+                            )}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    );
+}

@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, BookOpen, LogOut, User } from 'lucide-react';
+import { Home, CheckSquare, BookOpen, LogOut, User, Activity } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import UndoSnackbar from './UndoSnackbar';
@@ -24,6 +24,7 @@ export default function Layout() {
     const navItems = [
         { path: '/', icon: Home, label: 'Home' },
         { path: '/todos', icon: CheckSquare, label: 'Todos' },
+        { path: '/habits', icon: Activity, label: 'Habits' },
         { path: '/journal', icon: BookOpen, label: 'Journal' },
     ];
 
@@ -36,8 +37,8 @@ export default function Layout() {
     };
 
     return (
-        <div className="min-h-screen transition-colors duration-200 pb-20 relative" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
-            <header className="px-6 py-4 sticky top-0 z-10 backdrop-blur-md bg-opacity-80 border-b" style={{ backgroundColor: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+        <div className="h-screen flex flex-col transition-colors duration-200" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)' }}>
+            <header className="px-6 py-4 z-10 backdrop-blur-md bg-opacity-80 border-b flex-shrink-0" style={{ backgroundColor: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
                 <div className="content-container flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <Link to="/" className="hover:opacity-80 transition-opacity">
@@ -63,11 +64,11 @@ export default function Layout() {
                 </div>
             </header>
 
-            <main className="p-6">
+            <main className="flex-1 overflow-y-auto p-6">
                 <Outlet />
             </main>
 
-            <nav className="absolute bottom-0 left-0 right-0 backdrop-blur-md py-4 z-10" style={{ backgroundColor: 'var(--color-bg-secondary)' + 'cc', borderTop: '1px solid var(--color-border)' }}>
+            <nav className="backdrop-blur-md py-4 z-10 flex-shrink-0" style={{ backgroundColor: 'var(--color-bg-secondary)' + 'cc', borderTop: '1px solid var(--color-border)' }}>
                 <div className="content-container flex justify-between items-center">
                     {navItems.map(({ path, icon: Icon, label }) => (
                         <Link

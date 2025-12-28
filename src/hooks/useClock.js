@@ -28,5 +28,13 @@ export function useClock() {
         });
     };
 
-    return { time, greeting: getGreeting(), formattedTime: formatTime() };
+    const formatDate = () => {
+        const weekday = time.toLocaleDateString(language, { weekday: 'long' });
+        const day = time.getDate().toString().padStart(2, '0');
+        const month = (time.getMonth() + 1).toString().padStart(2, '0');
+        const year = time.getFullYear();
+        return `${weekday} ${day}/${month}/${year}`;
+    };
+
+    return { time, greeting: getGreeting(), formattedTime: formatTime(), formattedDate: formatDate() };
 }

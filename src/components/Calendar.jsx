@@ -4,6 +4,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 export default function Calendar({ onDateSelect, selectedDate }) {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -66,9 +67,17 @@ export default function Calendar({ onDateSelect, selectedDate }) {
     };
 
     // Get first day of month (0 = Sunday, 1 = Monday, etc.)
+    const { settings } = useSettings();
+    const startOfWeek = settings?.startOfWeek || 'monday';
+
+    // Get first day of month (0 = Sunday, 1 = Monday, etc.)
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    // Adjust so Monday = 0, Sunday = 6
-    const firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
+
+    // Adjust offset based on start of week
+    let firstDayAdjusted = firstDay;
+    if (startOfWeek === 'monday') {
+        firstDayAdjusted = firstDay === 0 ? 6 : firstDay - 1;
+    }
 
     // Get number of days in month
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -124,9 +133,10 @@ export default function Calendar({ onDateSelect, selectedDate }) {
     }
 
     // Generate week days based on locale
-    // Jan 2, 2023 was a Monday. We want Mon-Sun.
     const weekDays = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(2023, 0, i + 2);
+        // Jan 1 2023 was Sunday
+        const startDay = startOfWeek === 'monday' ? 2 : 1;
+        const d = new Date(2023, 0, i + startDay);
         return d.toLocaleString(language, { weekday: 'short' });
     });
 

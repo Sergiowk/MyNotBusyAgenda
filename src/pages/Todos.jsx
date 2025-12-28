@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import { useTodos } from '../hooks/useTodos';
-import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil } from 'lucide-react';
+import { Plus, Trash2, CheckCircle, Circle, Clock, X, Calendar, List, Pencil, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
 import HistoryModal from '../components/HistoryModal';
 import IncompleteTasksModal from '../components/IncompleteTasksModal';
@@ -11,26 +11,69 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { CSS } from '@dnd-kit/utilities';
 
 // Helper component for rendering task item
-const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, setEditText, saveEdit, handleEditKeyDown, isOverdue, t, isHistoryView, deleteTodo, rescheduleTodo, reschedulingTask, setReschedulingTask }) => {
+const TaskItem = memo(({ todo, toggleTodo, startEditing, editingTaskId, editText, setEditText, saveEdit, handleEditKeyDown, isOverdue, t, isHistoryView, deleteTodo, rescheduleTodo, reschedulingTask, setReschedulingTask }) => {
+    const isEditing = editingTaskId === todo.id;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+    const textareaRef = useRef(null);
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        }
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+            return () => document.removeEventListener('mousedown', handleClickOutside);
+        }
+    }, [isMenuOpen]);
+
+    // Auto-resize textarea for editing
+    useEffect(() => {
+        if (isEditing && textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+            // Focus and move cursor to end
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(textareaRef.current.value.length, textareaRef.current.value.length);
+        }
+    }, [isEditing, editText]);
+
+    // Helper for menu positioning
+    const [menuPosition, setMenuPosition] = useState('bottom'); // 'bottom' or 'top'
+
+    const toggleMenu = () => {
+        if (!isMenuOpen) {
+            // Check space below before opening
+            if (menuRef.current) {
+                const rect = menuRef.current.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.bottom;
+                // If less than 150px below, open upwards
+                setMenuPosition(spaceBelow < 150 ? 'top' : 'bottom');
+            }
+        }
+        setIsMenuOpen(!isMenuOpen);
+    };
+
     return (
         <div
             className={clsx(
-                "group flex items-center justify-between rounded-xl border shadow-sm transition-all hover:shadow-md",
-                todo.completed && "opacity-75",
+                "group flex items-center justify-between rounded-xl border shadow-sm transition-all hover:shadow-md relative",
+                isMenuOpen && "z-50",
                 isOverdue ? "p-5" : "p-4"
             )}
             style={{
                 backgroundColor: 'var(--color-bg-card)',
                 borderColor: 'var(--color-border)',
-                // If it's draggable, we might want to disable default touch actions? 
-                // But this one is shared for completed too.
                 touchAction: 'none'
             }}
         >
-            <div className="flex items-start gap-3 flex-1 text-left min-w-0">
+            <div className={clsx("flex items-start gap-3 flex-1 text-left min-w-0", todo.completed && "opacity-75")}>
                 <div onPointerDown={(e) => e.stopPropagation()}>
                     <button
-                        onClick={() => toggleTodo(todo.id)}
+                        onClick={() => toggleTodo(todo.id, todo.completed)}
                         className="mt-0.5 flex-shrink-0 cursor-pointer"
                         style={{ pointerEvents: 'auto' }}
                     >
@@ -43,24 +86,30 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                 </div>
 
                 <div className="flex-1 min-w-0">
-                    {editingTaskId === todo.id ? (
-                        <input
-                            type="text"
+                    {isEditing ? (
+                        <textarea
+                            ref={textareaRef}
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             onBlur={saveEdit}
-                            onKeyDown={handleEditKeyDown}
-                            autoFocus
-                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    saveEdit();
+                                }
+                                handleEditKeyDown(e);
+                            }}
+                            className="w-full bg-transparent border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 px-1 py-0.5 resize-none overflow-hidden"
+                            rows={1}
                             style={{ color: 'var(--color-text-primary)' }}
                         />
                     ) : (
                         <button
-                            onClick={() => toggleTodo(todo.id)}
+                            onClick={() => toggleTodo(todo.id, todo.completed)}
                             className="text-left w-full"
                         >
                             <span
-                                className={clsx("text-lg transition-all block", todo.completed && "line-through")}
+                                className={clsx("text-lg transition-all block", todo.completed && "line-through opacity-50 font-light")}
                                 style={{
                                     color: todo.completed ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
                                     wordWrap: 'break-word',
@@ -75,25 +124,14 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
 
                     {isOverdue && !editingTaskId && (
                         <span className="text-sm mt-1 block" style={{ color: '#ef4444' }}>
-                            {t('tasks.created')}: {isOverdue.toLocaleDateString()} {/* Expecting date object here if passed */}
+                            {t('tasks.created')}: {isOverdue.toLocaleDateString()}
                         </span>
                     )}
                 </div>
             </div>
 
             {!isHistoryView && (
-                <div className="flex items-center gap-1 ml-2" onPointerDown={(e) => e.stopPropagation()}>
-                    {/* Edit button */}
-                    <button
-                        onClick={() => startEditing(todo)}
-                        className="p-2 hover:text-blue-600 transition-colors"
-                        style={{ color: 'var(--color-text-muted)' }}
-                        aria-label={t('tasks.edit_label')}
-                    >
-                        <Pencil size={20} />
-                    </button>
-
-                    {/* Reschedule button */}
+                <div className="flex items-center gap-1 ml-2 relative" onPointerDown={(e) => e.stopPropagation()}>
                     {reschedulingTask === todo.id ? (
                         <DatePickerButton
                             selectedDate={null}
@@ -103,35 +141,75 @@ const TaskItem = ({ todo, toggleTodo, startEditing, editingTaskId, editText, set
                                 }
                                 setReschedulingTask(null);
                             }}
+                            onClose={() => setReschedulingTask(null)}
                             autoOpen={true}
                         />
                     ) : (
-                        <button
-                            onClick={() => setReschedulingTask(todo.id)}
-                            className="p-2 hover:text-blue-600 transition-colors"
-                            style={{ color: 'var(--color-text-muted)' }}
-                            aria-label="Reschedule task"
-                        >
-                            <Calendar size={20} />
-                        </button>
+                        <div ref={menuRef} className="relative">
+                            <button
+                                onClick={toggleMenu}
+                                className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors"
+                                style={{ color: 'var(--color-text-muted)' }}
+                                aria-label="More options"
+                            >
+                                <MoreVertical size={20} />
+                            </button>
+
+                            {isMenuOpen && (
+                                <div
+                                    className={clsx(
+                                        "absolute right-0 w-40 rounded-xl shadow-lg border overflow-hidden z-10 animate-in fade-in zoom-in-95 duration-100",
+                                        menuPosition === 'top' ? "bottom-full mb-2" : "top-full mt-1"
+                                    )}
+                                    style={{
+                                        backgroundColor: 'var(--color-bg-card)',
+                                        borderColor: 'var(--color-border)',
+                                    }}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            startEditing(todo);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        style={{ color: 'var(--color-text-primary)' }}
+                                    >
+                                        <Pencil size={14} />
+                                        {t('tasks.edit_label')}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setReschedulingTask(todo.id);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        style={{ color: 'var(--color-text-primary)' }}
+                                    >
+                                        <Calendar size={14} />
+                                        {t('common.reschedule') || 'Reschedule'}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            deleteTodo(todo.id, todo);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-red-500/10 text-red-600 transition-colors"
+                                    >
+                                        <Trash2 size={14} />
+                                        {t('tasks.delete_label')}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     )}
-                    {/* Delete button */}
-                    <button
-                        onClick={() => deleteTodo(todo.id)}
-                        className="p-2 hover:text-red-600 transition-colors"
-                        style={{ color: 'var(--color-text-muted)' }}
-                        aria-label={t('tasks.delete_label')}
-                    >
-                        <Trash2 size={20} />
-                    </button>
                 </div>
             )}
         </div>
     );
-};
+});
 
 // Sortable wrapper
-const SortableTaskItem = (props) => {
+const SortableTaskItem = memo((props) => {
     const {
         attributes,
         listeners,
@@ -153,7 +231,7 @@ const SortableTaskItem = (props) => {
             <TaskItem {...props} />
         </div>
     );
-};
+});
 
 export default function Todos() {
     const [selectedDate, setSelectedDate] = useState(null);
@@ -164,6 +242,22 @@ export default function Todos() {
     const [input, setInput] = useState('');
     const [reschedulingTask, setReschedulingTask] = useState(null); // Track which task is being rescheduled
     const { t } = useLanguage();
+    const textareaRef = useRef(null);
+
+    // Auto-resize textarea
+    useEffect(() => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+    }, [input]);
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit(e);
+        }
+    };
 
     // Sensors for drag and drop
     const sensors = useSensors(
@@ -182,31 +276,31 @@ export default function Todos() {
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [editText, setEditText] = useState('');
 
-    const startEditing = (todo) => {
+    const startEditing = useCallback((todo) => {
         setEditingTaskId(todo.id);
         setEditText(todo.text);
-    };
+    }, []);
 
-    const saveEdit = () => {
+    const saveEdit = useCallback(() => {
         if (editingTaskId && editText.trim()) {
             updateTodoText(editingTaskId, editText);
             setEditingTaskId(null);
             setEditText('');
         }
-    };
+    }, [editingTaskId, editText, updateTodoText]);
 
-    const cancelEdit = () => {
+    const cancelEdit = useCallback(() => {
         setEditingTaskId(null);
         setEditText('');
-    };
+    }, []);
 
-    const handleEditKeyDown = (e) => {
+    const handleEditKeyDown = useCallback((e) => {
         if (e.key === 'Enter') {
             saveEdit();
         } else if (e.key === 'Escape') {
             cancelEdit();
         }
-    };
+    }, [saveEdit, cancelEdit]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -316,19 +410,21 @@ export default function Todos() {
 
             {!isHistoryView && (
                 <form onSubmit={handleSubmit} className="relative">
-                    <input
-                        type="text"
+                    <textarea
+                        ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder={t('tasks.placeholder')}
-                        className="w-full p-4 pr-32 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all"
+                        className="w-full p-4 pr-32 rounded-xl border shadow-sm focus:outline-none focus:ring-2 transition-all resize-none overflow-hidden min-h-[3.5rem]"
+                        rows={1}
                         style={{
                             backgroundColor: 'var(--color-bg-card)',
                             borderColor: 'var(--color-border)',
                             color: 'var(--color-text-primary)'
                         }}
                     />
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <div className="absolute right-2 bottom-3 flex items-center gap-1">
                         <DatePickerButton
                             selectedDate={taskDate}
                             onDateChange={setTaskDate}
@@ -368,7 +464,7 @@ export default function Todos() {
                                         toggleTodo={toggleTodo}
                                         startEditing={startEditing}
                                         editingTaskId={editingTaskId}
-                                        editText={editText}
+                                        editText={editingTaskId === todo.id ? editText : undefined}
                                         setEditText={setEditText}
                                         saveEdit={saveEdit}
                                         handleEditKeyDown={handleEditKeyDown}
@@ -398,7 +494,7 @@ export default function Todos() {
                                         toggleTodo={toggleTodo}
                                         startEditing={startEditing}
                                         editingTaskId={editingTaskId}
-                                        editText={editText}
+                                        editText={editingTaskId === todo.id ? editText : undefined}
                                         setEditText={setEditText}
                                         saveEdit={saveEdit}
                                         handleEditKeyDown={handleEditKeyDown}

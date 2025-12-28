@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy, where } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { collection, addDoc, updateDoc, deleteDoc, doc, query, onSnapshot, orderBy, where, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { useUndo } from '../contexts/UndoContext';
@@ -62,9 +62,23 @@ export function useTodos(date = null) {
                         return false;
                     }
 
-                    // Show all tasks from today, but only incomplete tasks from previous dates
+                    // Show all tasks from today
+                    if (todoDate.getTime() === today.getTime()) {
+                        return true;
+                    }
+
+                    // For past tasks: show if incomplete OR if completed today
                     if (todoDate.getTime() < today.getTime()) {
-                        return !todo.completed;
+                        if (!todo.completed) return true;
+
+                        // Check if completed today
+                        if (todo.completedAt) {
+                            const completedDate = new Date(todo.completedAt.toDate());
+                            completedDate.setHours(0, 0, 0, 0);
+                            return completedDate.getTime() === today.getTime();
+                        }
+
+                        return false;
                     }
                     return true;
                 });
@@ -76,7 +90,7 @@ export function useTodos(date = null) {
         return unsubscribe;
     }, [user, date]);
 
-    const addTodo = async (text, category = 'general', customDate = null) => {
+    const addTodo = useCallback(async (text, category = 'general', customDate = null) => {
         if (!text.trim() || !user) return;
 
         try {
@@ -94,44 +108,49 @@ export function useTodos(date = null) {
         } catch (error) {
             console.error('Error adding todo:', error);
         }
-    };
+    }, [user]);
 
-    const toggleTodo = async (id) => {
+    const toggleTodo = useCallback(async (id, currentCompleted) => {
         if (!user) return;
 
         try {
-            const todo = todos.find(t => t.id === id);
             const todoRef = doc(db, 'users', user.uid, 'todos', id);
-            await updateDoc(todoRef, {
-                completed: !todo.completed
-            });
+            const updates = {
+                completed: !currentCompleted
+            };
+
+            // If we are completing it, set completedAt to now
+            // If we are un-completing it, remove completedAt (or set null)
+            if (!currentCompleted) {
+                updates.completedAt = new Date();
+            } else {
+                updates.completedAt = null;
+            }
+
+            await updateDoc(todoRef, updates);
         } catch (error) {
             console.error('Error toggling todo:', error);
         }
-    };
+    }, [user]);
 
-    const deleteTodo = async (id) => {
-        if (!user) return;
+    const deleteTodo = useCallback(async (id, todoData) => {
+        if (!user || !todoData) return;
 
         try {
-            // Find the todo to store its data for potential undo
-            const todo = todos.find(t => t.id === id);
-            if (!todo) return;
-
             // Schedule the deletion with undo capability
             scheduleDelete(
                 id,
                 'todo',
-                todo,
+                todoData,
                 // onUndo: restore the todo by adding it back
                 async () => {
                     try {
-                        const encryptedText = encryptData(todo.text, user.uid);
+                        const encryptedText = encryptData(todoData.text, user.uid);
                         await addDoc(collection(db, 'users', user.uid, 'todos'), {
                             text: encryptedText,
-                            completed: todo.completed,
-                            category: todo.category,
-                            createdAt: todo.createdAt,
+                            completed: todoData.completed,
+                            category: todoData.category,
+                            createdAt: todoData.createdAt,
                         });
                     } catch (error) {
                         console.error('Error restoring todo:', error);
@@ -149,10 +168,10 @@ export function useTodos(date = null) {
         } catch (error) {
             console.error('Error scheduling todo deletion:', error);
         }
-    };
+    }, [user, scheduleDelete]);
 
 
-    const updateTodoText = async (id, newText) => {
+    const updateTodoText = useCallback(async (id, newText) => {
         if (!user || !newText.trim()) return;
 
         const trimmedText = newText.trim();
@@ -169,9 +188,9 @@ export function useTodos(date = null) {
         } catch (error) {
             console.error('Error updating todo text:', error);
         }
-    };
+    }, [user]);
 
-    const rescheduleTodo = async (id, newDate) => {
+    const rescheduleTodo = useCallback(async (id, newDate) => {
         if (!user) return;
 
         try {
@@ -186,9 +205,9 @@ export function useTodos(date = null) {
         } catch (error) {
             console.error('Error rescheduling todo:', error);
         }
-    };
+    }, [user]);
 
-    const reorderTodos = async (newTodos) => {
+    const reorderTodos = useCallback(async (newTodos) => {
         if (!user) return;
 
         // Optimistic update
@@ -204,24 +223,19 @@ export function useTodos(date = null) {
         });
 
         try {
-            const batch = null; // We can't use batch easily if we don't import writeBatch. 
-            // For simplicity with the current imports, we will use individual updates. 
-            // ideally we should import writeBatch from firebase/firestore.
+            const batch = writeBatch(db);
 
-            // Let's rely on the fact that for a daily list, N is small.
-            // But better to use batch if possible. Let's stick to Promise.all for now as it is strictly parallel.
-
-            const updates = newTodos.map((todo, index) => {
+            newTodos.forEach((todo, index) => {
                 const todoRef = doc(db, 'users', user.uid, 'todos', todo.id);
-                return updateDoc(todoRef, { order: index });
+                batch.update(todoRef, { order: index });
             });
 
-            await Promise.all(updates);
+            await batch.commit();
         } catch (error) {
             console.error('Error reordering todos:', error);
             // Revert state if needed? For now assuming success or minor glitch.
         }
-    };
+    }, [user, setTodos]);
 
     return { todos, addTodo, toggleTodo, deleteTodo, updateTodoText, rescheduleTodo, reorderTodos };
 }

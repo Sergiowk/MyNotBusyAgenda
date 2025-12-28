@@ -67,9 +67,19 @@ export function useIncompleteTodos() {
         try {
             const todo = incompleteTodos.find(t => t.id === id);
             const todoRef = doc(db, 'users', user.uid, 'todos', id);
-            await updateDoc(todoRef, {
+
+            const updates = {
                 completed: !todo.completed
-            });
+            };
+
+            // If we are completing it, set completedAt to now
+            if (!todo.completed) {
+                updates.completedAt = new Date();
+            } else {
+                updates.completedAt = null;
+            }
+
+            await updateDoc(todoRef, updates);
         } catch (error) {
             console.error('Error toggling todo:', error);
         }
